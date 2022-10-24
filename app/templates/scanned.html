@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h3>foodfighters home page</h3>
+
+    the barcode scanned was: {{ barcode }}
+
+    <div>
+    {% if 'product' in data %}
+        {{ data['product']['product_name'] }}
+        {{ data['product']['nutriments']['energy-kcal'] }}
+    {% else %}
+        the product details was not found
+    {% endif %}
+    </div>
+</div>
+  
+  
+{% endblock %}

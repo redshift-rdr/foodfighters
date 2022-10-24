@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    foodfighters home page
+    <div id="shot"></div>
+    <div>
+        <video style="width: 100%;" id="video" autoplay></video>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='camera.js') }}"></script>
+  
+  
+{% endblock %}

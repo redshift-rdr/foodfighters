@@ -1,3 +1,7 @@
 .big-check {
     padding: .7em;
 }
+
+.border-success {
+    border: 2px solid red;
+}

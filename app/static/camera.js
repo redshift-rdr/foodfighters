@@ -1,20 +1,50 @@
-let camera_button = document.querySelector("#start-camera");
 let video = document.querySelector("#video");
-let click_button = document.querySelector("#click-photo");
-let canvas = document.querySelector("#canvas");
 
-camera_button.addEventListener('click', async function() {
-   	let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-	video.srcObject = stream;
+video.setAttribute('playsinline', '');
+video.setAttribute('autoplay', '');
+video.setAttribute('muted', '');
+
+/* Setting up the constraint */
+var facingMode = "environment"; // Can be 'user' or 'environment' to access back or front camera (NEAT!)
+var constraints = {
+  audio: false,
+  video: {
+   facingMode: facingMode,
+    width: { ideal: 4096 },
+    height: { ideal: 2160 }
+  }
+};
+
+/* Stream it to video element */
+navigator.mediaDevices.getUserMedia(constraints).then(function success(stream) {
+  video.srcObject = stream;
 });
 
-click_button.addEventListener('click', function() {
-   	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+setInterval(send_image, 1000);
+
+function send_image() 
+{
+	var canvas = document.createElement("canvas");
+	canvas.width = video.videoWidth;
+	canvas.height = video.videoHeight;
+	canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+	
+	//document.querySelector("#shot").appendChild(canvas);
    	canvas.toBlob((blob) => {
-		fetch('/image/upload',
+		const resp = fetch('/scan_barcode',
 		{
 			method: 'POST',
 			body: blob
+		}).then(response => {
+			if (response.redirected) {
+				window.location.href = response.url;
+			}
+			else
+			{
+				console.log('not found');
+			}
+		}).catch(error => {
+			console.log('not found');
 		});
 	});	
-});
+}
