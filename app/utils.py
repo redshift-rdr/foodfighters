@@ -24,3 +24,20 @@ def get_barcode_from_imagedata(imagedata : str):
         return None
     
     return barcodes[0]
+
+def add_nutrition_data(nutrition_iterable):
+    """
+        'nutrition_iterable' needs to be an iterable whose elements implement .nutrition() method
+        that returns a dict of nutrition data
+    """
+    nutrition_info = {}
+
+    for elem in nutrition_iterable:
+        if getattr(elem, 'nutrition', None):
+            for k,v in elem.nutrition().items():
+                if not k in nutrition_info:
+                    nutrition_info[k] = v
+                else:
+                    nutrition_info[k] += v
+
+    return nutrition_info
