@@ -82,11 +82,11 @@ class FoodEntry(db.Model):
         return amount
     
     def nutrition(self):
-        nutrition_info = {}
-        for attr in ['calories_kcal', 'fat', 'saturated_fat', 
-                     'carbohydrate', 'sugar', 'protein', 'salt', 'fibre']:
-            nutrition_info[attr] = getattr(self.food, attr)
+        nutrition_info = self.food.nutrition()
 
+        for record in nutrition_info.keys():
+            nutrition_info[record] *= self.quantity
+        
         return nutrition_info
     
 class Food(db.Model):
@@ -95,19 +95,30 @@ class Food(db.Model):
     barcode = db.Column(db.String(32), index=True, nullable=False)
     brand = db.Column(db.String(32))
 
-    # nutrition information
-    calories_kcal = db.Column(db.Integer)
-    fat = db.Column(db.Float)
-    saturated_fat = db.Column(db.Float)
-    carbohydrate = db.Column(db.Float)
-    sugar = db.Column(db.Float)
-    protein = db.Column(db.Float)
-    salt = db.Column(db.Float)
-    fibre = db.Column(db.Float)
-
     # relationships
+    nutrition_records = db.relationship('NutritionRecord', back_populates='food')
+
     foodentry_id = db.Column(db.String(36), db.ForeignKey('food_entry.id'))
     foodentry = db.relationship('FoodEntry', back_populates='food')
 
     def __repr__(self):
         return f'<Food: {self.name}>'
+
+    def nutrition(self):
+        nutrition_info = {}
+
+        for record in self.nutrition_records:
+            nutrition_info[record.name] = record.amount
+
+        return nutrition_info
+
+class NutritionRecord(db.Model):
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    name = db.Column(db.String(64), nullable=False)
+    amount = db.Column(db.Float)
+
+    food_id = db.Column(db.String(36), db.ForeignKey('food.id'))
+    food = db.relationship('Food', back_populates='nutrition_records')
+
+    def __repr__(self):
+        return f'<NutritionRecord: {self.name}-{self.id}>'
