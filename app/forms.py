@@ -1,31 +1,33 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateField, HiddenField, FloatField, SelectField, FloatField
-from wtforms.validators import DataRequired, Optional
+from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateField, HiddenField, FloatField, SelectField, FloatField, PasswordField
+from wtforms.validators import DataRequired, Optional, Email, EqualTo, ValidationError
+from app.models import Profile
+from password_strength import PasswordStats
 
-class AddProfile(FlaskForm):
-    name = StringField('Profile Name', validators=[DataRequired()])
-    submit = SubmitField('Add')
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Register')
 
-class AddRecurringRecordForm(FlaskForm):
-    uuid = HiddenField('uuid')
-    type = SelectField('Type', choices=[('expense', 'expense'), ('income', 'income')])
-    name = StringField('Name', validators=[DataRequired()])
-    description = StringField('Description')
-    amount = FloatField('Amount', validators=[DataRequired()])
-    recurring_dom = IntegerField('Repeat DOM')
-    addthismonth = BooleanField('Add to this month')
-    payment_method = SelectField('Payment Method', choices=[('Automatic', 'automatic'), ('Manual', 'Manual')])
-    submit = SubmitField('Submit')
+    def validate_username(self, username):
+        user = Profile.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different username.')
 
-class AddRecordForm(FlaskForm):
-    uuid = HiddenField('uuid')
-    type = SelectField('Type', choices=[('expense', 'expense'), ('income', 'income')])
-    recurring = BooleanField('Recurring')
-    addthismonth = BooleanField('Add to this month')
-    name = StringField('Name', validators=[DataRequired()])
-    description = StringField('Description')
-    amount = FloatField('Amount', validators=[DataRequired()])
-    recurring_dom = IntegerField('Repeat DOM')
-    payment_method = SelectField('Payment Method', choices=[('automatic', 'Automatic'), ('manual', 'Manual')])
-    paid = BooleanField('Paid')
-    submit = SubmitField('Submit')
+    def validate_email(self, email):
+        user = Profile.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different email address.')
+
+    def validate_password(self, password):
+        password_stat = PasswordStats(password.data)
+
+        if password_stat.strength() < 0.66:
+            raise ValidationError('Please use a more complex password')
+        
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')

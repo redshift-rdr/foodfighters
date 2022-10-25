@@ -3,7 +3,7 @@ from lib2to3 import pytree
 from flask import render_template, flash, redirect, request, url_for, session, make_response
 from app import app, db
 from app.models import *
-from app.forms import *
+from app.forms import RegisterForm
 from datetime import datetime, timedelta
 from app.utils import get_barcode_from_imagedata
 import requests
@@ -12,6 +12,12 @@ import requests
 @app.route('/index')
 def index():
     return render_template('index.html')
+
+@app.route('/register')
+def register():
+    form = RegisterForm()
+
+    return render_template('register.html', form=form, nonav=True)
 
 @app.route('/scan')
 def scan():
