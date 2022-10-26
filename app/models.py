@@ -12,7 +12,7 @@ def generate_uuid():
 
 @login.user_loader
 def load_user(id):
-    return Profile.query.get(int(id))
+    return Profile.query.get(id)
 
 class Profile(db.Model, UserMixin):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
