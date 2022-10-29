@@ -1,6 +1,7 @@
 from base64 import decode
 from lib2to3 import pytree
 import profile
+from unicodedata import category
 from flask import render_template, flash, redirect, request, url_for, session, make_response
 from app import app, db
 from app.models import *
@@ -14,7 +15,8 @@ import requests
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html')
+    return redirect(url_for('diary'))
+    #return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,8 +50,8 @@ def register():
 
     return render_template('register.html', form=form, nonav=True)
 
-@app.route('/diary', defaults={'indate':''})
-@app.route('/diary/<indate>')
+@app.route('/diary', defaults={'indate':''}, methods=['GET', 'POST'])
+@app.route('/diary/<indate>', methods=['GET', 'POST'])
 @login_required
 def diary(indate : str):
     """
@@ -68,11 +70,23 @@ def diary(indate : str):
         db.session.commit()
 
     form = addMealForm()
-    # TODO: finish this
+    if form.validate_on_submit():
+        add_meal = Meal(category=form.category.data, diaryentry=diary_entry)
+        db.session.add(add_meal)
+        db.session.commit()
 
-    return render_template('diary.html', diary_entry=diary_entry)
+    return render_template('diary.html', diary_entry=diary_entry, form=form)
 
+@app.route('/addfood/<meal_id>')
+@login_required
+def addfood(meal_id):
+    meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
+
+    if not meal:
+        return redirect(url_for('index'))
     
+    return render_template('addfood.html', meal=meal)
+
 @app.route('/scan')
 @login_required
 def scan():

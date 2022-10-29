@@ -10,7 +10,7 @@
                     <a class="btn btn-outline-light" onclick="date_button_change('minus')"><i class="bi bi-arrow-left"></i></a>
                 </div>
                 <div class="col p-0">
-                    <input class="form-control" type="date" id="date-select" value="{{diary_entry.day}}" onchange="date_select_change(this)">
+                    <input style="text-align: center;" class="form-control" type="date" id="date-select" value="{{diary_entry.day}}" onchange="date_select_change(this)">
                 </div>
                 <div class="col-2 p-0">
                     <a class="btn btn-outline-light" onclick="date_button_change('add')"><i class="bi bi-arrow-right"></i></a>
@@ -26,7 +26,9 @@
                     Total calories
                 </div>
                 <div class="col">
-                    <b>{{ diary_entry.nutrition()['calories_kcal']|int }}</b>
+                    {% if 'calories_kcal' in diary_entry.nutrition() %}
+                        <b>{{ diary_entry.nutrition()['calories_kcal']|int }}</b>
+                    {% endif %}
                 </div>
             </div>
             
@@ -41,7 +43,9 @@
                         {{ meal.category|capitalize }}
                     </div>
                     <div class="col">
-                        <b>{{ meal.nutrition()['calories_kcal']|int }}</b>
+                        {% if 'calories_kcal' in meal.nutrition() %}
+                            <b>{{ meal.nutrition()['calories_kcal']|int }}</b>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -58,7 +62,7 @@
                 {% endfor %}
             </div>
             <div class="card-footer">
-                <a style="text-decoration: none;" class="link-success" href="">Add food</a>
+                <a style="text-decoration: none;" class="link-success" href="{{ url_for('addfood', meal_id=meal.id) }}">Add food</a>
             </div>
         </div>
     {% endfor %}
@@ -69,7 +73,21 @@
         </div>
         <div class="collapse" id="addMealCollapse">
             <div class="card-body">
-              Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-floating mb-1">
+                        {{ form.category(size=36, class_='form-control', placeholder="category", autocomplete="off") }}
+                        {{ form.category.label(class_='text-muted') }}
+
+                        {% for error in form.category.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-success btn-lg bg-gradient") }}
+                    </div>
+                </form>
             </div>
         </div>
     </div>

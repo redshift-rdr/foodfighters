@@ -33,5 +33,5 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class addMealForm(FlaskForm):
-    category = StringField('Category')
+    category = StringField('Category (breakfast, lunch etc)')
     submit = SubmitField('Add')
