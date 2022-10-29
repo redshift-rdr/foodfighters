@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-2">
+    <div id="date_select_card" class="card bg-success text-center">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2 p-0">
+                    <a class="btn btn-outline-light" onclick="date_button_change('minus')"><i class="bi bi-arrow-left"></i></a>
+                </div>
+                <div class="col p-0">
+                    <input class="form-control" type="date" id="date-select" value="{{diary_entry.day}}" onchange="date_select_change(this)">
+                </div>
+                <div class="col-2 p-0">
+                    <a class="btn btn-outline-light" onclick="date_button_change('add')"><i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-2">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-10">
+                    Total calories
+                </div>
+                <div class="col">
+                    <b>{{ diary_entry.nutrition()['calories_kcal']|int }}</b>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    {% for meal in diary_entry.meals %}
+        <div class="card mt-2">
+            <div class="card-header bg-success text-light">
+                <div class="row">
+                    <div class="col-10">
+                        {{ meal.category|capitalize }}
+                    </div>
+                    <div class="col">
+                        <b>{{ meal.nutrition()['calories_kcal']|int }}</b>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for entry in meal.foodentries %}
+                    <div class="row">
+                        <div class="col-10">
+                            {{ entry.food.name }}{% if entry.food.brand %}, <span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
+                        </div>
+                        <div class="col">
+                            {{ entry.nutrition()['calories_kcal']|int}}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer">
+                <a style="text-decoration: none;" class="link-success" href="">Add food</a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="card mt-2">
+        <div class="card-header">
+            <a style="text-decoration: none;" class="link-success" data-bs-toggle="collapse" href="#addMealCollapse" aria-expanded="false" aria-controls="addMealCollapse">Add meal</a>
+        </div>
+        <div class="collapse" id="addMealCollapse">
+            <div class="card-body">
+              Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+            </div>
+        </div>
+    </div>
+</div>
+
+  
+  
+{% endblock %}

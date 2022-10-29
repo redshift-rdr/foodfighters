@@ -31,3 +31,7 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+class addMealForm(FlaskForm):
+    category = StringField('Category')
+    submit = SubmitField('Add')

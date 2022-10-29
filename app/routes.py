@@ -1,10 +1,11 @@
 from base64 import decode
 from lib2to3 import pytree
+import profile
 from flask import render_template, flash, redirect, request, url_for, session, make_response
 from app import app, db
 from app.models import *
-from app.forms import LoginForm, RegisterForm
-from datetime import datetime, timedelta
+from app.forms import LoginForm, RegisterForm, addMealForm
+from datetime import date, timedelta
 from app.utils import get_barcode_from_imagedata
 from flask_login import current_user, login_user, logout_user, login_required
 import requests
@@ -47,6 +48,31 @@ def register():
 
     return render_template('register.html', form=form, nonav=True)
 
+@app.route('/diary', defaults={'indate':''})
+@app.route('/diary/<indate>')
+@login_required
+def diary(indate : str):
+    """
+        args:
+            date - str, optional - needs to be a string date in ISO format e.g. '2022-10-29'
+    """
+    if not indate:
+        date_select = date.today()
+    else:
+        date_select = date.fromisoformat(indate)
+
+    diary_entry = db.session.query(DiaryEntry).filter_by(day=date_select).one_or_none()
+    if not diary_entry:
+        diary_entry = DiaryEntry(day=date_select, profile=current_user)
+        db.session.add(diary_entry)
+        db.session.commit()
+
+    form = addMealForm()
+    # TODO: finish this
+
+    return render_template('diary.html', diary_entry=diary_entry)
+
+    
 @app.route('/scan')
 @login_required
 def scan():
