@@ -17,12 +17,24 @@
         <div class="col mt-2">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="search_icon"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" placeholder="search" aria-label="search" aria-describedby="search_icon">
+                <input id="food_lookup_input" type="text" class="form-control" placeholder="search" aria-label="search" aria-describedby="search_icon" onblur="food_lookup()">
             </div>
-            
         </div>
-        
     </div>
+    <div id="food_list_container">
+
+        {% for food in foods %}
+            <div class="row">
+                <div class="col mt-2">
+                    <div class="card card-body">
+                        {{ food.name }} <a href="{{ url_for('addfood', meal_id=meal.id, food_id=food.id) }}">Add</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    
     
     
 </div>

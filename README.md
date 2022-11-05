@@ -7,7 +7,7 @@ using image recognition the application will extract calorie information from fo
 the application will keep track of calories consumed per day, per user.
 
 ## roadmap: to be implemented
-- [ ] image recognition: use ocr to extract text information from food packaging
+- [x] image recognition: use ocr to extract text information from food packaging
 - [ ] save food information to database
-- [ ] implement user accounts
-- [ ] save daily calorie information for each user account
+- [x] implement user accounts
+- [x] save daily calorie information for each user account

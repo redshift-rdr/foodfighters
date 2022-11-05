@@ -2,7 +2,7 @@ from base64 import decode
 from lib2to3 import pytree
 import profile
 from unicodedata import category
-from flask import render_template, flash, redirect, request, url_for, session, make_response
+from flask import render_template, flash, redirect, request, url_for, session, make_response, jsonify
 from app import app, db
 from app.models import *
 from app.forms import LoginForm, RegisterForm, addMealForm
@@ -77,15 +77,34 @@ def diary(indate : str):
 
     return render_template('diary.html', diary_entry=diary_entry, form=form)
 
-@app.route('/addfood/<meal_id>')
+@app.route('/addmeal/<meal_id>', methods=['GET', 'POST'])
+@app.route('/addmeal/<meal_id>/<query>', methods=['GET', 'POST'])
 @login_required
-def addfood(meal_id):
+def addmeal(meal_id, query=''):
     meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
+
+    query = f'%{query}%'
+    foods = db.session.query(Food).filter(Food.name.like(query)).all()
 
     if not meal:
         return redirect(url_for('index'))
     
-    return render_template('addfood.html', meal=meal)
+    return render_template('addmeal.html', meal=meal, foods=foods)
+
+@app.route('/addfood/<meal_id>/<food_id>', methods=['GET','POST'])
+@login_required
+def addfood(meal_id, food_id):
+    meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
+    food = db.session.query(Food).filter_by(id=food_id).one_or_none()
+
+    if not meal or not food:
+        return redirect(url_for('index'))
+    
+    food_entry = FoodEntry(meal=meal, food=food, quantity=1)
+    db.session.add(food_entry)
+    db.session.commit()
+
+    return redirect(url_for('diary'))
 
 @app.route('/scan')
 @login_required
@@ -101,7 +120,8 @@ def upload():
     if not barcode:
         return 'no barcode was detected', 400
 
-    return redirect(url_for('search_barcode', barcode=barcode.data.decode()))
+    return barcode.data.decode(),200
+    #return redirect(url_for('search_barcode', barcode=barcode.data.decode()))
 
 @app.route('/barcode/search/<barcode>')
 @login_required

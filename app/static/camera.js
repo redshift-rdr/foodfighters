@@ -36,12 +36,10 @@ function send_image()
 			method: 'POST',
 			body: blob
 		}).then(response => {
-			if (response.redirected) {
-				window.location.href = response.url;
-			}
-			else
+			if (response.status === 200)
 			{
-				console.log('not found');
+				// TODO: make this go to food add
+				window.location.href = ''
 			}
 		}).catch(error => {
 			console.log('not found');
