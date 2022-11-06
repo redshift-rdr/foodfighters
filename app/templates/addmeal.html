@@ -6,7 +6,7 @@
     <h1>Add food for meal</h1>
     <div class="row">
         <div class="d-grid gap-2">
-            <a class="btn btn-lg btn-success" href="{{ url_for('scan') }}">
+            <a class="btn btn-lg btn-success" href="{{ url_for('scan', meal_id=meal.id) }}">
                 <h6 class="display-1">
                     <i class="bi bi-upc-scan"></i>
                 </h6>
@@ -32,11 +32,7 @@
                 </div>
             </div>
         {% endfor %}
-
     </div>
-    
-    
-    
 </div>
 
   

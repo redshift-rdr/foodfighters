@@ -31,18 +31,26 @@ function send_image()
 	
 	//document.querySelector("#shot").appendChild(canvas);
    	canvas.toBlob((blob) => {
-		const resp = fetch('/scan_barcode',
+		var url = '/scan_barcode';
+		var http = new XMLHttpRequest();
+		var meal_id = document.getElementById('meal_id').value;
+		http.onreadystatechange = function()
 		{
-			method: 'POST',
-			body: blob
-		}).then(response => {
-			if (response.status === 200)
+			if (http.readyState == 4 && http.status == 200)
 			{
-				// TODO: make this go to food add
-				window.location.href = ''
+				window.location.href = `/barcode/search/${meal_id}/${http.responseText}`;
 			}
-		}).catch(error => {
-			console.log('not found');
-		});
+		};
+
+		http.open("POST", url);
+		http.send(blob);
+		// const resp = fetch('/scan_barcode',
+		// {
+		// 	method: 'POST',
+		// 	body: blob
+		// }).then(response => response.text())
+	    // .then((response) => {
+		// 	window.location.href = '/barcode/search/' + response;
+		// })
 	});	
 }

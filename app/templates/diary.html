@@ -26,8 +26,8 @@
                     Total calories
                 </div>
                 <div class="col">
-                    {% if 'calories_kcal' in diary_entry.nutrition() %}
-                        <b>{{ diary_entry.nutrition()['calories_kcal']|int }}</b>
+                    {% if 'calories' in diary_entry.nutrition() %}
+                        <b>{{ diary_entry.nutrition()['calories']|int }}</b>
                     {% endif %}
                 </div>
             </div>
@@ -43,8 +43,8 @@
                         {{ meal.category|capitalize }}
                     </div>
                     <div class="col">
-                        {% if 'calories_kcal' in meal.nutrition() %}
-                            <b>{{ meal.nutrition()['calories_kcal']|int }}</b>
+                        {% if 'calories' in meal.nutrition() %}
+                            <b>{{ meal.nutrition()['calories']|int }}</b>
                         {% endif %}
                     </div>
                 </div>
@@ -56,7 +56,9 @@
                             {{ entry.food.name }}{% if entry.food.brand %}, <span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
                         </div>
                         <div class="col">
-                            {{ entry.nutrition()['calories_kcal']|int}}
+                            {% if 'calories' in meal.nutrition() %}
+                                {{ entry.nutrition()['calories']|int}}
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}

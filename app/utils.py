@@ -1,4 +1,4 @@
-import cv2
+import cv2, requests
 from pyzbar.pyzbar import decode, ZBarSymbol
 import numpy
 
@@ -40,3 +40,14 @@ def add_nutrition_data(nutrition_iterable):
                     nutrition_info[k] += v
 
     return nutrition_info
+
+def search_barcode(barcode):
+    url = f'https://off:off@world.openfoodfacts.net/api/v2/product/{barcode}'
+
+    try:
+        r = requests.get(url)
+        data = r.json()
+    except Exception as e:
+        return f'there was an error: {e}'
+
+    return data

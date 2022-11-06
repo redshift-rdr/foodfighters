@@ -7,9 +7,43 @@ from app import app, db
 from app.models import *
 from app.forms import LoginForm, RegisterForm, addMealForm
 from datetime import date, timedelta
-from app.utils import get_barcode_from_imagedata
+from app.utils import get_barcode_from_imagedata, search_barcode
 from flask_login import current_user, login_user, logout_user, login_required
-import requests
+
+def add_off_data_as_food(data):
+    """
+        TODO: redo this - 
+    """
+    #try:
+    product_name = data['product']['product_name']
+    brand = data['product']['brands']
+    barcode = data['code']
+    size = data['product']['serving_quantity']
+
+    nutrient_data = data['product']['nutriments']
+    nutrition_records = {
+        "calories": nutrient_data['energy-kcal_serving'],
+        "fat": nutrient_data['fat_serving'],
+        "sugar": nutrient_data['sugars_serving'],
+        "salt": nutrient_data['salt_serving'],
+        "protein": nutrient_data['proteins_serving'],
+        "fibre": nutrient_data['fiber_serving']
+    }
+    
+
+    food = Food(name=product_name, barcode=barcode, brand=brand)
+    nrs = []
+    for k, v in nutrition_records.items():
+        nrs.append(NutritionRecord(name=k, amount=v, food=food))
+
+    db.session.add(food)
+    db.session.add_all(nrs)
+    db.session.commit()
+    # except Exception as e:
+    #     print(f'Error: {e}')
+    #     return None
+
+    return food.id
 
 @app.route('/')
 @app.route('/index')
@@ -106,10 +140,10 @@ def addfood(meal_id, food_id):
 
     return redirect(url_for('diary'))
 
-@app.route('/scan')
+@app.route('/scan/<meal_id>')
 @login_required
-def scan():
-    return render_template('scan.html')
+def scan(meal_id):
+    return render_template('scan.html', meal_id=meal_id)
 
 @app.route('/scan_barcode', methods=['POST'])
 @login_required
@@ -118,20 +152,22 @@ def upload():
 
     barcode = get_barcode_from_imagedata(data)
     if not barcode:
-        return 'no barcode was detected', 400
+        return 'no barcode found', 400
 
-    return barcode.data.decode(),200
-    #return redirect(url_for('search_barcode', barcode=barcode.data.decode()))
+    return barcode.data.decode(), 200
 
-@app.route('/barcode/search/<barcode>')
+@app.route('/barcode/search/<meal_id>/<barcode>', methods=['GET','POST'])
 @login_required
-def search_barcode(barcode):
-    url = f'https://off:off@world.openfoodfacts.net/api/v2/product/{barcode}'
+def barcode_search(meal_id, barcode):
+    fooddata = search_barcode(barcode)
 
-    try:
-        r = requests.get(url)
-        data = r.json()
-    except Exception as e:
-        return f'there was an error: {e}'
+    if not fooddata:
+        flash('Could not find food on Open Food Facts')
+        return redirect(url_for('addmeal', meal_id=meal_id))
+    
+    food_id = add_off_data_as_food(fooddata)
+    if not food_id:
+        flash('There was an error adding the food')
+        return redirect(url_for('addmeal', meal_id=meal_id))
 
-    return render_template('scanned.html', barcode=barcode, data=data)
+    return redirect(url_for('addfood', meal_id=meal_id, food_id=food_id))
