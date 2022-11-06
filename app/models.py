@@ -77,7 +77,7 @@ class FoodEntry(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
     # relationships
-    food = db.relationship('Food', back_populates='foodentry', uselist=False)
+    food = db.relationship('Food', back_populates='foodentry')
 
     meal_id = db.Column(db.String(36), db.ForeignKey('meal.id'))
     meal = db.relationship('Meal', back_populates='foodentries')

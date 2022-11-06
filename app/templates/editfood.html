@@ -2,35 +2,55 @@
 
 {% block content %}
 
-<div class="container text-center">
-    <h1>Edit food</h1>
-    {{ food.name }}
-    <div class="row">
+<div class="container">
+    <div class="row mt-2">
         <div class="col">
-            <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.name }}" onblur="edit_food(this, 'Food', 'name')">
+            <div class="form-floating mb-1">
+                <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.name }}" placeholder="name" onblur="edit_food(this, 'Food', 'name')">
+                <label class="text-muted">name</label>
+            </div>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.brand }}" onblur="edit_food(this, 'Food', 'brand')">
+            <div class="form-floating mb-1">
+                <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.brand }}" placeholder="brand" onblur="edit_food(this, 'Food', 'brand')">
+                <label class="text-muted">brand</label>
+            </div>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <input class="form-control" data-uuid="{{ food.id }}" type="number" value="{{ food.serving_size }}" onblur="edit_food_size(this)">
+            <div class="form-floating mb-1">
+                <input class="form-control" data-uuid="{{ food.id }}" type="number" value="{{ food.serving_size }}" placeholder="serving size (g)" onblur="edit_food_size(this)">
+                <label class="text-muted">serving size (g)</label>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="row mt-2 mb-1 text-center text-decoration-underline ps-1">
+        <div class="col">
+            nutrition
+        </div>
+        <div class="col-4">
+            per 100g
+        </div>
+        <div class="col">
+            per serving
         </div>
     </div>
 
     {% for record in food.nutrition_records %}
-        <div class="row">
-            <div class="col-4">
+        <div class="row mb-1 align-items-center text-center ps-1">
+            <div class="col">
                 {{ record.name }}
             </div>
-            <div class="col">
-                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.per_100 | round(3)}}" step=".01" onblur="edit_food(this, 'NutritionRecord', 'per_100')">
+            <div class="col-4">
+                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.per_100 | round(3)}}" step=".01" onblur="edit_nutrition_per100(this)">
             </div>
             <div class="col">
-                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.amount | round(2) }}" step=".01" onblur="edit_food(this, 'NutritionRecord', 'amount')">
+                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.amount | round(2) }}" step=".01" disabled>
             </div>
         </div>
     {% endfor %}

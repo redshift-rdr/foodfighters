@@ -134,7 +134,7 @@ def addmeal(meal_id, query=''):
     meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
 
     query = f'%{query}%'
-    foods = db.session.query(Food).filter(Food.name.like(query)).all()
+    foods = db.session.query(Food).filter(Food.name.like(query)).limit(5).all()
 
     if not meal:
         return redirect(url_for('index'))
@@ -150,7 +150,7 @@ def addfood(meal_id, food_id):
     if not meal or not food:
         return redirect(url_for('index'))
     
-    food_entry = FoodEntry(meal=meal, food=food, quantity=1)
+    food_entry = FoodEntry(meal=meal, food=[food], quantity=1)
     db.session.add(food_entry)
     db.session.commit()
 
@@ -315,3 +315,18 @@ def api_update_servingsize(food_id):
 
     return jsonify({"status": "success"})
 
+@app.route('/api/update_nutrition/<record_id>', methods=['POST'])
+def api_update_nutritionrecord(record_id):
+    record = db.session.query(NutritionRecord).filter_by(id=record_id).one_or_none()
+    data = request.get_json()
+
+    if not record:
+        return 'record not found', 400
+    
+    record.per_100 = float(data["per_100"])
+    record.update()
+
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify({"status": "success"})

@@ -104,3 +104,33 @@ function edit_food_size(input)
     // send off the request
     http.send(JSON.stringify({ "serving_size" : input.value }));
 }
+
+function edit_nutrition_per100(input)
+{
+    // grab the task uuid from the checkbox data
+    var uuid = input.dataset.uuid;
+
+    // construct the http request
+    var url = "/api/update_nutrition/" + uuid;
+    var http = new XMLHttpRequest();
+    http.onreadystatechange = function()
+    {
+        // if the request finishes and is successful
+        if (http.readyState == 4 && http.status == 200)
+        {
+            location.reload();
+        }
+        else if (http.readyState == 4 && http.status != 200)
+        {
+            // log the error
+            console.log(http.responseText);
+        }
+    };
+
+    // open the request, and set the data type to JSON
+    http.open("POST", url);
+    http.setRequestHeader("Content-Type", "application/json");
+
+    // send off the request
+    http.send(JSON.stringify({ "per_100" : input.value }));
+}
