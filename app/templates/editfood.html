@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container text-center">
+    <h1>Edit food</h1>
+    {{ food.name }}
+    <div class="row">
+        <div class="col">
+            <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.name }}" onblur="edit_food(this, 'Food', 'name')">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <input class="form-control" data-uuid="{{ food.id }}" type="text" value="{{ food.brand }}" onblur="edit_food(this, 'Food', 'brand')">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <input class="form-control" data-uuid="{{ food.id }}" type="number" value="{{ food.serving_size }}" onblur="edit_food_size(this)">
+        </div>
+    </div>
+
+    {% for record in food.nutrition_records %}
+        <div class="row">
+            <div class="col-4">
+                {{ record.name }}
+            </div>
+            <div class="col">
+                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.per_100 | round(3)}}" step=".01" onblur="edit_food(this, 'NutritionRecord', 'per_100')">
+            </div>
+            <div class="col">
+                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.amount | round(2) }}" step=".01" onblur="edit_food(this, 'NutritionRecord', 'amount')">
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+  
+  
+{% endblock %}

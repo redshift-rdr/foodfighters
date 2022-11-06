@@ -30,6 +30,9 @@ class Profile(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+    
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class DiaryEntry(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -46,6 +49,9 @@ class DiaryEntry(db.Model):
 
     def nutrition(self):
         return add_nutrition_data(self.meals)
+    
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Meal(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -62,6 +68,9 @@ class Meal(db.Model):
     
     def nutrition(self):
         return add_nutrition_data(self.foodentries)
+    
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class FoodEntry(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -89,11 +98,15 @@ class FoodEntry(db.Model):
         
         return nutrition_info
     
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
 class Food(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     name = db.Column(db.String(32), index=True, nullable=False)
     barcode = db.Column(db.String(32), index=True, nullable=False)
     brand = db.Column(db.String(32))
+    serving_size = db.Column(db.Integer, nullable=False)
 
     # relationships
     nutrition_records = db.relationship('NutritionRecord', back_populates='food')
@@ -111,10 +124,15 @@ class Food(db.Model):
             nutrition_info[record.name] = record.amount
 
         return nutrition_info
+    
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class NutritionRecord(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     name = db.Column(db.String(64), nullable=False)
+    per_100 = db.Column(db.Float)
     amount = db.Column(db.Float)
 
     food_id = db.Column(db.String(36), db.ForeignKey('food.id'))
@@ -122,3 +140,12 @@ class NutritionRecord(db.Model):
 
     def __repr__(self):
         return f'<NutritionRecord: {self.name}-{self.id}>'
+    
+    def normalised(self):
+        return self.per_100 / 100
+    
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def update(self):
+        self.amount = self.normalised() * int(self.food.serving_size)

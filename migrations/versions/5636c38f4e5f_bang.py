@@ -1,8 +1,8 @@
 """bang
 
-Revision ID: 84bf64084907
+Revision ID: 5636c38f4e5f
 Revises: 
-Create Date: 2022-10-25 17:10:12.863879
+Create Date: 2022-11-06 15:21:22.126116
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '84bf64084907'
+revision = '5636c38f4e5f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -53,6 +53,7 @@ def upgrade():
     sa.Column('name', sa.String(length=32), nullable=False),
     sa.Column('barcode', sa.String(length=32), nullable=False),
     sa.Column('brand', sa.String(length=32), nullable=True),
+    sa.Column('serving_size', sa.Integer(), nullable=False),
     sa.Column('foodentry_id', sa.String(length=36), nullable=True),
     sa.ForeignKeyConstraint(['foodentry_id'], ['food_entry.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -62,6 +63,7 @@ def upgrade():
     op.create_table('nutrition_record',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
+    sa.Column('per_100', sa.Float(), nullable=True),
     sa.Column('amount', sa.Float(), nullable=True),
     sa.Column('food_id', sa.String(length=36), nullable=True),
     sa.ForeignKeyConstraint(['food_id'], ['food.id'], ),

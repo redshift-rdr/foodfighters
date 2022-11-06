@@ -27,17 +27,24 @@
               <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">-->
-              <ul class="navbar-nav">
+              <ul class="navbar-nav ms-auto me-auto">
                 <li class="nav-item">
-                  <a class="nav-link" href=""><i class="bi bi-plus-circle me-2"></i>Link</a>
+                  <div class="row text-center">
+                      <div class="col">
+                        <a class="nav-link" href="{{ url_for('diary') }}">
+                            <i class="bi bi-book"></i>
+                            <div>Diary</div>
+                        </a>
+                      </div>
+                      <div class="col">
+                        <a class="nav-link" href="">
+                            <i class="bi bi-person-square"></i>
+                            <div>Profile</div>
+                        </a>
+                      </div>
+                  </div>
                 </li>
               </ul>
-              <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                  <a class="nav-link" href=""><i class="bi bi-person-circle"></i> </a>
-                </li>
-              </ul>
-            
           </div>
         </nav>
       {% endif %}

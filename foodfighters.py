@@ -3,4 +3,4 @@ from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionReco
 
 @app.shell_context_processor
 def make_shell_context():
-    return {'db': db, 'Profile': Profile, 'DiaryEntry': DiaryEntry, 'Meal': Meal, 'FoodEntry': FoodEntry, 'Food': Food, 'NutrientRecord': NutritionRecord}
+    return {'db': db, 'Profile': Profile, 'DiaryEntry': DiaryEntry, 'Meal': Meal, 'FoodEntry': FoodEntry, 'Food': Food, 'NutritionRecord': NutritionRecord}

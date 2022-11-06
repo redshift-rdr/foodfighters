@@ -27,7 +27,7 @@
             <div class="row">
                 <div class="col mt-2">
                     <div class="card card-body">
-                        {{ food.name }} <a href="{{ url_for('addfood', meal_id=meal.id, food_id=food.id) }}">Add</a>
+                        <a href="{{ url_for('edit_food',food_id=food.id) }}">{{ food.name }}</a> <a href="{{ url_for('addfood', meal_id=meal.id, food_id=food.id) }}">Add</a>
                     </div>
                 </div>
             </div>

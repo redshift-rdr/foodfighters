@@ -4,11 +4,26 @@ import profile
 from unicodedata import category
 from flask import render_template, flash, redirect, request, url_for, session, make_response, jsonify
 from app import app, db
-from app.models import *
+from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
 from app.forms import LoginForm, RegisterForm, addMealForm
 from datetime import date, timedelta
 from app.utils import get_barcode_from_imagedata, search_barcode
 from flask_login import current_user, login_user, logout_user, login_required
+
+## utility functions
+def get_model(model_name : str):
+    model_map = {
+        'DiaryEntry': DiaryEntry,
+        'Meal': Meal,
+        'FoodEntry': FoodEntry,
+        'Food': Food,
+        'NutritionRecord': NutritionRecord
+    }
+
+    try:
+        return model_map[model_name]
+    except KeyError:
+        return None
 
 def add_off_data_as_food(data):
     """
@@ -22,19 +37,20 @@ def add_off_data_as_food(data):
 
     nutrient_data = data['product']['nutriments']
     nutrition_records = {
-        "calories": nutrient_data['energy-kcal_serving'],
-        "fat": nutrient_data['fat_serving'],
-        "sugar": nutrient_data['sugars_serving'],
-        "salt": nutrient_data['salt_serving'],
-        "protein": nutrient_data['proteins_serving'],
-        "fibre": nutrient_data['fiber_serving']
+        "calories": nutrient_data['energy-kcal_100g'],
+        "fat": nutrient_data['fat_100g'],
+        "sugar": nutrient_data['sugars_100g'],
+        "salt": nutrient_data['salt_100g'],
+        "protein": nutrient_data['proteins_100g'],
+        "fibre": nutrient_data['fiber_100g']
     }
     
+    print(nutrition_records)
 
-    food = Food(name=product_name, barcode=barcode, brand=brand)
+    food = Food(name=product_name, barcode=barcode, serving_size=size, brand=brand)
     nrs = []
     for k, v in nutrition_records.items():
-        nrs.append(NutritionRecord(name=k, amount=v, food=food))
+        nrs.append(NutritionRecord(name=k, per_100=round(v, 2), amount=round(v/100*int(food.serving_size), 2), food=food))
 
     db.session.add(food)
     db.session.add_all(nrs)
@@ -171,3 +187,131 @@ def barcode_search(meal_id, barcode):
         return redirect(url_for('addmeal', meal_id=meal_id))
 
     return redirect(url_for('addfood', meal_id=meal_id, food_id=food_id))
+
+@app.route('/food/edit/<food_id>', methods=['GET', 'POST'])
+@login_required
+def edit_food(food_id):
+    food = db.session.query(Food).filter_by(id=food_id).one_or_none()
+
+    if not food:
+        flash('Food not found')
+        return redirect(url_for('index'))
+    
+    return render_template('editfood.html', food=food)
+    
+
+## API routes
+# get all instances in model
+@app.route('/api/<model>')
+def get_all(model):
+    model = get_model(model)
+
+    items = db.session.query(model).all()
+    json_items = [item.as_dict() for item in items]
+
+    return jsonify(json_items)
+
+# get a specific instance of model
+@app.route('/api/<model>/<uuid>')
+def get_one(model, uuid):
+    model = get_model(model)
+
+    item = db.session.query(model).filter_by(id=uuid).first()
+    if not item:
+        return jsonify({})
+
+    return jsonify(item.as_dict())
+
+# add an new instance of a model
+@app.route('/api/<model>/add', methods=['POST'])
+def add(model):
+    model = get_model(model)
+    data = request.get_json()
+
+    try:
+        model_instance = model(**data)
+    except Exception as e:
+        return jsonify({'error': f'{e}'})
+
+    db.session.add(model_instance)
+    db.session.commit()
+
+    return jsonify(model_instance.as_dict())
+
+# update an instance of a model
+@app.route('/api/<model>/<uuid>/update', methods=['POST'])
+def update(model, uuid):
+    model = get_model(model)
+    data = request.get_json()
+
+    model_instance = db.session.query(model).filter_by(id=uuid).first()
+    if not model_instance:
+        return jsonify({"error": "could not find a model with that uuid"}),400
+
+    try:
+        for k,v in data.items():
+            if hasattr(model_instance, k):
+                # hack for date fields
+                if k in ['start', 'end', 'deadline']:
+                    setattr(model_instance, k, date.fromisoformat(v))
+                else:
+                    setattr(model_instance, k, v)
+
+        db.session.add(model_instance)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"error" : f"{e}"}),400
+
+    return jsonify(model_instance.as_dict())
+
+# delete an instance of a model
+@app.route('/api/<model>/<uuid>/remove', methods=['POST'])
+def remove(model, uuid):
+    model = get_model(model)
+    data = request.get_json()
+
+    try:
+        db.session.query(model).filter_by(id=uuid).delete()
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"error" : f"{e}"}), 400
+
+    return jsonify({"status": "success", "message": "model deleted successfully"})
+
+# create a relationship between models
+@app.route('/api/<model>/<uuid>/link', methods=['POST'])
+def link(model, uuid):
+    model = get_model(model)
+    data = request.get_json()
+
+    link_model = get_model(data["model"])
+
+    to_link = db.session.query(link_model).filter_by(id=data["uuid"]).first()
+    model_instance = db.session.query(model).filter_by(id=uuid).first()
+
+    setattr(model_instance, data["linked_attribute"], to_link)
+
+    db.session.add_all([to_link, model_instance])
+    db.session.commit()
+
+    return jsonify(model_instance.as_dict())
+
+@app.route('/api/update_food_size/<food_id>', methods=['POST'])
+def api_update_servingsize(food_id):
+    food = db.session.query(Food).filter_by(id=food_id).one_or_none()
+    data = request.get_json()
+
+    if not food:
+        return 'none found', 400
+    
+    food.serving_size = data["serving_size"]
+
+    for nut_record in food.nutrition_records:
+        nut_record.update()
+        db.session.add(nut_record)
+
+    db.session.add(food)
+    db.session.commit()
+
+    return jsonify({"status": "success"})
+

@@ -53,7 +53,7 @@
                 {% for entry in meal.foodentries %}
                     <div class="row">
                         <div class="col-10">
-                            {{ entry.food.name }}{% if entry.food.brand %}, <span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
+                            <a class="link-success" href="{{ url_for('edit_food',food_id=entry.food.id) }}">{{ entry.food.name }}</a>{% if entry.food.brand %}, <span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
                         </div>
                         <div class="col">
                             {% if 'calories' in meal.nutrition() %}
