@@ -77,7 +77,8 @@ class FoodEntry(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
     # relationships
-    food = db.relationship('Food', back_populates='foodentry')
+    food_id = db.Column(db.String(36), db.ForeignKey('food.id'))
+    food = db.relationship('Food')
 
     meal_id = db.Column(db.String(36), db.ForeignKey('meal.id'))
     meal = db.relationship('Meal', back_populates='foodentries')
@@ -110,9 +111,6 @@ class Food(db.Model):
 
     # relationships
     nutrition_records = db.relationship('NutritionRecord', back_populates='food')
-
-    foodentry_id = db.Column(db.String(36), db.ForeignKey('food_entry.id'))
-    foodentry = db.relationship('FoodEntry', back_populates='food')
 
     def __repr__(self):
         return f'<Food: {self.name}>'

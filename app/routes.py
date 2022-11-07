@@ -24,6 +24,10 @@ def get_model(model_name : str):
         return model_map[model_name]
     except KeyError:
         return None
+    
+def lookup_barcode(barcode):
+    return db.session.query(Food).filter_by(barcode=barcode).one_or_none()
+
 
 def add_off_data_as_food(data):
     """
@@ -127,6 +131,14 @@ def diary(indate : str):
 
     return render_template('diary.html', diary_entry=diary_entry, form=form)
 
+@app.route('/meal/remove_food/<foodentry_id>', methods=['GET'])
+@login_required
+def remove_food(foodentry_id):
+    foodentry = db.session.query(FoodEntry).filter_by(id=foodentry_id).delete()
+    db.session.commit()
+
+    return redirect(url_for('diary'))
+
 @app.route('/addmeal/<meal_id>', methods=['GET', 'POST'])
 @app.route('/addmeal/<meal_id>/<query>', methods=['GET', 'POST'])
 @login_required
@@ -150,7 +162,7 @@ def addfood(meal_id, food_id):
     if not meal or not food:
         return redirect(url_for('index'))
     
-    food_entry = FoodEntry(meal=meal, food=[food], quantity=1)
+    food_entry = FoodEntry(meal=meal, food=food, quantity=1)
     db.session.add(food_entry)
     db.session.commit()
 
@@ -175,16 +187,21 @@ def upload():
 @app.route('/barcode/search/<meal_id>/<barcode>', methods=['GET','POST'])
 @login_required
 def barcode_search(meal_id, barcode):
-    fooddata = search_barcode(barcode)
+    food = lookup_barcode(barcode)
 
-    if not fooddata:
-        flash('Could not find food on Open Food Facts')
-        return redirect(url_for('addmeal', meal_id=meal_id))
-    
-    food_id = add_off_data_as_food(fooddata)
-    if not food_id:
-        flash('There was an error adding the food')
-        return redirect(url_for('addmeal', meal_id=meal_id))
+    if not food:
+        fooddata = search_barcode(barcode)
+
+        if not fooddata:
+            flash('Could not find food on Open Food Facts')
+            return redirect(url_for('addmeal', meal_id=meal_id))
+        
+        food_id = add_off_data_as_food(fooddata)
+        if not food_id:
+            flash('There was an error adding the food')
+            return redirect(url_for('addmeal', meal_id=meal_id))
+    else:
+        food_id = food.id
 
     return redirect(url_for('addfood', meal_id=meal_id, food_id=food_id))
 
