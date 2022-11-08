@@ -134,3 +134,12 @@ function edit_nutrition_per100(input)
     // send off the request
     http.send(JSON.stringify({ "per_100" : input.value }));
 }
+
+function toggle_remove_button(remove_container_id, calories_container_id)
+{
+    var remove_container = $('.' + remove_container_id);
+    var calories_container = $('.' + calories_container_id);
+
+    remove_container.toggle();
+    calories_container.toggle();
+}

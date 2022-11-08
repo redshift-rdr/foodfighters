@@ -54,15 +54,21 @@
                     {% for entry in meal.foodentries %}
                         <div class="row">
                             <div class="col-10">
-                                <span class="collapse remove-col-{{meal.id}}">
-                                    <a class="link-danger" href="{{ url_for('remove_food', foodentry_id=entry.id) }}"><i class="bi bi-x-lg"></i></a>
-                                </span>
-                                <a class="link-success" href="{{ url_for('edit_food',food_id=entry.food.id) }}">{{ entry.food.name }}</a>{% if entry.food.brand %}, <span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
+                                <a class="link-success" href="{{ url_for('edit_food',food_id=entry.food.id) }}">{{ entry.food.name }}</a>
                             </div>
                             <div class="col">
                                 {% if 'calories' in meal.nutrition() %}
-                                    {{ entry.nutrition()['calories']|int}}
+                                    <span class="calories_container_{{meal.id}}">{{ entry.nutrition()['calories']|int}}</span>
                                 {% endif %}
+
+                                <span style="display: none" class="remove_container_{{meal.id}}">
+                                    <a class="text-danger" href="{{ url_for('remove_food', foodentry_id=entry.id) }}"><i class="bi bi-x-lg"></i></a>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                {% if entry.food.brand %}<span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -70,11 +76,20 @@
             {% endif %}
             <div class="card-footer">
                 <div class="row">
-                    <div class="col-8">
+                    <div class="col-10">
                         <a style="text-decoration: none;" class="link-success" href="{{ url_for('addmeal', meal_id=meal.id) }}">Add food</a>
                     </div>
                     <div class="col">
-                        <a data-bs-toggle="collapse" href=".remove-col-{{meal.id}}" role="button" aria-expanded="false" aria-controls="remove-col-{{meal.id}}">Remove</a>
+                        
+                        <div class="dropdown">
+                            <a class="link-dark" href="#" role="button" id="meal_options_link" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </a>
+                          
+                            <ul class="dropdown-menu" aria-labelledby="meal_options_link">
+                                <li><a class="dropdown-item" onclick="toggle_remove_button('remove_container_{{meal.id}}', 'calories_container_{{meal.id}}')">Remove entries</a></li>
+                            </ul>
+                          </div>
                     </div>
                 </div>
                 
