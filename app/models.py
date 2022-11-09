@@ -2,7 +2,7 @@ import uuid
 from app import db, login
 from flask_login import UserMixin
 from app.utils import add_nutrition_data
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from sqlalchemy.orm import backref, validates
 from dateutil.relativedelta import relativedelta
 from werkzeug.security import generate_password_hash, check_password_hash

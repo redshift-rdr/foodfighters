@@ -72,10 +72,17 @@ def index():
     return redirect(url_for('diary'))
     #return render_template('index.html')
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     change_password_form = ChangePasswordForm()
+
+    if change_password_form.validate_on_submit():
+        if current_user.check_password(change_password_form.current_password.data):
+            current_user.set_password(change_password_form.new_password.data)
+            flash('Password changed successfully')
+        else:
+            flash('Incorrect current password')
 
     return render_template('profile.html', profile=current_user, form=change_password_form)
 
