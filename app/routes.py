@@ -5,7 +5,7 @@ from unicodedata import category
 from flask import render_template, flash, redirect, request, url_for, session, make_response, jsonify
 from app import app, db
 from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
-from app.forms import LoginForm, RegisterForm, addMealForm
+from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm
 from datetime import date, timedelta
 from app.utils import get_barcode_from_imagedata, search_barcode
 from flask_login import current_user, login_user, logout_user, login_required
@@ -72,6 +72,13 @@ def index():
     return redirect(url_for('diary'))
     #return render_template('index.html')
 
+@app.route('/profile')
+@login_required
+def profile():
+    change_password_form = ChangePasswordForm()
+
+    return render_template('profile.html', profile=current_user, form=change_password_form)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -134,10 +141,11 @@ def diary(indate : str):
 @app.route('/meal/remove_food/<foodentry_id>', methods=['GET'])
 @login_required
 def remove_food(foodentry_id):
+    diary_date = request.args.get('diary_date')
     foodentry = db.session.query(FoodEntry).filter_by(id=foodentry_id).delete()
     db.session.commit()
 
-    return redirect(url_for('diary'))
+    return redirect(url_for('diary', indate=diary_date))
 
 @app.route('/addmeal/<meal_id>', methods=['GET', 'POST'])
 @app.route('/addmeal/<meal_id>/<query>', methods=['GET', 'POST'])
@@ -149,6 +157,7 @@ def addmeal(meal_id, query=''):
     foods = db.session.query(Food).filter(Food.name.like(query)).limit(5).all()
 
     if not meal:
+        flash('That meal ID doesnt exist!')
         return redirect(url_for('index'))
     
     return render_template('addmeal.html', meal=meal, foods=foods)
@@ -158,15 +167,17 @@ def addmeal(meal_id, query=''):
 def addfood(meal_id, food_id):
     meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
     food = db.session.query(Food).filter_by(id=food_id).one_or_none()
+    diary_date = request.args.get('diary_date', default='')
 
     if not meal or not food:
+        flash('That meal ID or food ID doesnt exist!')
         return redirect(url_for('index'))
     
     food_entry = FoodEntry(meal=meal, food=food, quantity=1)
     db.session.add(food_entry)
     db.session.commit()
 
-    return redirect(url_for('diary'))
+    return redirect(url_for('diary', indate=diary_date))
 
 @app.route('/scan/<meal_id>')
 @login_required
@@ -215,6 +226,23 @@ def edit_food(food_id):
         return redirect(url_for('index'))
     
     return render_template('editfood.html', food=food)
+
+@app.route('/meal/<uuid>/remove', methods=['GET'])
+@login_required
+def remove_meal(uuid):
+    diary_date = request.args.get('diary_date', default='')
+    meal = db.session.query(Meal).filter_by(id=uuid).one_or_none()
+
+    if not meal:
+        flash('That meal ID doesnt exist')
+
+    for entry in meal.foodentries:
+        db.session.query(FoodEntry).filter_by(id=entry.id).delete()
+
+    db.session.query(Meal).filter_by(id=uuid).delete()
+    db.session.commit()
+
+    return redirect(url_for('diary', indate=diary_date))
     
 
 ## API routes

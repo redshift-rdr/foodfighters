@@ -62,7 +62,7 @@
                                 {% endif %}
 
                                 <span style="display: none" class="remove_container_{{meal.id}}">
-                                    <a class="text-danger" href="{{ url_for('remove_food', foodentry_id=entry.id) }}"><i class="bi bi-x-lg"></i></a>
+                                    <a class="text-danger" href="{{ url_for('remove_food', foodentry_id=entry.id, diary_date=diary_entry.day.isoformat()) }}"><i class="bi bi-x-lg"></i></a>
                                 </span>
                             </div>
                         </div>
@@ -80,14 +80,14 @@
                         <a style="text-decoration: none;" class="link-success" href="{{ url_for('addmeal', meal_id=meal.id) }}">Add food</a>
                     </div>
                     <div class="col">
-                        
                         <div class="dropdown">
                             <a class="link-dark" href="#" role="button" id="meal_options_link" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </a>
                           
                             <ul class="dropdown-menu" aria-labelledby="meal_options_link">
-                                <li><a class="dropdown-item" onclick="toggle_remove_button('remove_container_{{meal.id}}', 'calories_container_{{meal.id}}')">Remove entries</a></li>
+                                <li><a class="btn dropdown-item" onclick="toggle_remove_button('remove_container_{{meal.id}}', 'calories_container_{{meal.id}}')">Remove entries</a></li>
+                                <li><a class="btn dropdown-item" href="{{ url_for('remove_meal', uuid=meal.id, diary_date=diary_entry.day.isoformat()) }}">Remove meal</a></li>
                             </ul>
                           </div>
                     </div>

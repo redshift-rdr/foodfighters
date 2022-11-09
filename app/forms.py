@@ -25,7 +25,18 @@ class RegisterForm(FlaskForm):
         password_stat = PasswordStats(password.data)
 
         if password_stat.strength() < 0.66:
-            raise ValidationError('Please use a more complex password')
+            raise ValidationError('Thats a bad password. Choose a better one')
+        
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('new_password')])
+
+    def validate_new_password(self, password):
+        password_stat = PasswordStats(password.data)
+
+        if password_stat.strength() < 0.66:
+            raise ValidationError('Thats a bad password. Choose a better one')
         
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
