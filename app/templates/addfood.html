@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-2">
+    <div class="row">
+        <div class="col">
+            <h3 class="mb-3 fw-light">Manual Add</h3>
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="form-floating mb-1">
+                    {{ form.name(size=32, class_='form-control', placeholder="name", autocomplete="off") }}
+                    {{ form.name.label(class_='text-muted') }}
+
+                    {% for error in form.name.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-floating mb-1">
+                    {{ form.brand(size=32, class_='form-control', placeholder="brand", autocomplete="off") }}
+                    {{ form.brand.label(class_='text-muted') }}
+
+                    {% for error in form.brand.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-floating mb-1">
+                    {{ form.barcode(size=32, class_='form-control', placeholder="name", autocomplete="off") }}
+                    {{ form.barcode.label(class_='text-muted') }}
+
+                    {% for error in form.barcode.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.serving_size.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.serving_size(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.serving_size.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.calories.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.calories(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.calories.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.fat.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.fat(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.fat.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.sugar.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.sugar(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.sugar.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.salt.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.salt(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.salt.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.protein.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.protein(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.protein.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            {{ form.fibre.label(class_='text-muted') }}
+                        </div>
+                        <div class="col">
+                            {{ form.fibre(class_='form-control', autocomplete="off") }}
+                        </div>
+
+                        {% for error in form.fibre.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-success btn-lg bg-gradient") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+  
+  
+{% endblock %}

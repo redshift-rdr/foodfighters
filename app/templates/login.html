@@ -5,13 +5,6 @@
 <div class="container text-center d-flex align-items-center bg-success bg-gradient" style="height: 100vh">
     <div class="col-1 col-lg-3"></div>
     <div class="col-10 col-lg-6">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class='alert alert-success'>{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
         <div class="card">
             <div class="card-body">
                 <h3 class="mb-3 fw-light">LOGIN</h3>

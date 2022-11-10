@@ -3,20 +3,46 @@
 {% block content %}
 
 <div class="container mt-2">
-    <div class="card bg-success text-light">
-        <div class="card-body">
-            <span class="display-1">
-                <i class="bi bi-person-bounding-box"></i>
-                {{ profile.username }}
-            </span>
-        </div>
-    </div>
-
     <div class="card">
+        <div class="card-body text-center">
+            <img class="rounded-circle" id="avatar" alt="Avatar" data-username="{{ profile.username }}">
+            <div class="display-1 text-dark">
+                {{ profile.username }}
+            </div>
+        </div>
         <div class="card-body">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePWModal">
-                Change password 
-            </button>
+            <div class="row">
+                <div class="col">
+                    <div class="form-floating mb-1">
+                        <input class="form-control" data-uuid="{{ profile.id }}" type="text" value="{{ profile.username }}" placeholder="email" onblur="edit_food(this, 'Profile', 'username')">
+                        <label class="text-muted">Username</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-floating mb-1">
+                        <input class="form-control" data-uuid="{{ profile.id }}" type="text" value="{{ profile.email }}" placeholder="email" onblur="edit_food(this, 'Profile', 'email')">
+                        <label class="text-muted">Email</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-floating mb-1">
+                        <input class="form-control" data-uuid="{{ profile.id }}" type="text" value="{{ profile.default_meals }}" placeholder="meals" onblur="edit_food(this, 'Profile', 'default_meals')">
+                        <label class="text-muted">Default meals</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2 text-center">
+                <div class="col">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#changePWModal">
+                        <i class="bi bi-key"></i> Change password 
+                    </button>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -66,7 +92,5 @@
 
     
 </div>
-
-  
   
 {% endblock %}

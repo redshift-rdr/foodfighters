@@ -3,6 +3,7 @@ from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateFi
 from wtforms.validators import DataRequired, Optional, Email, EqualTo, ValidationError
 from app.models import Profile
 from password_strength import PasswordStats
+from wtforms.widgets import NumberInput
 
 class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -38,6 +39,23 @@ class ChangePasswordForm(FlaskForm):
 
         if password_stat.strength() < 0.66:
             raise ValidationError('Thats a bad password. Choose a better one')
+
+class ManualFoodForm(FlaskForm):
+    # food 
+    name = StringField('Name', validators=[DataRequired()])
+    brand = StringField('Brand')
+    barcode = StringField('Barcode', validators=[DataRequired()])
+    serving_size = IntegerField('Serving Size (g)', validators=[DataRequired()])
+
+    # nutrition records
+    calories = FloatField('Calories (per 100g)')
+    fat = FloatField('Fat (per 100g)')
+    sugar = FloatField('Sugar (per 100g)')
+    salt = FloatField('Salt (per 100g)')
+    protein = FloatField('Protein (per 100g)')
+    fibre = FloatField('Fibre (per 100g)')
+
+    submit = SubmitField('Add')
         
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])

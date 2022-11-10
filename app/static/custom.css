@@ -5,3 +5,16 @@
 .border-success {
     border: 2px solid red;
 }
+
+.inputbgsuccess {
+    background-color: rgb(123, 203, 123);
+}
+
+.inputbgfail {
+    background-color: rgb(188, 114, 114);
+}
+
+.inputbgfade {
+    transition: .5s;
+    background-color: white;
+}

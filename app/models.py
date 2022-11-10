@@ -19,6 +19,7 @@ class Profile(db.Model, UserMixin):
     username = db.Column(db.String(32), index=True)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(96), index=True, nullable=False)
+    default_meals = db.Column(db.Text)
 
     diaryentries = db.relationship('DiaryEntry', back_populates='profile')
 
@@ -33,6 +34,15 @@ class Profile(db.Model, UserMixin):
     
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def get_default_meals(self):
+        if self.default_meals:
+            if ',' in self.default_meals:
+                return self.default_meals.split(',')
+            else:
+                return [self.default_meals]
+        else:
+            return None
 
 class DiaryEntry(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)

@@ -5,7 +5,7 @@ from unicodedata import category
 from flask import render_template, flash, redirect, request, url_for, session, make_response, jsonify
 from app import app, db
 from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
-from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm
+from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm, ManualFoodForm
 from datetime import date, timedelta
 from app.utils import get_barcode_from_imagedata, search_barcode
 from flask_login import current_user, login_user, logout_user, login_required
@@ -13,6 +13,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 ## utility functions
 def get_model(model_name : str):
     model_map = {
+        'Profile': Profile,
         'DiaryEntry': DiaryEntry,
         'Meal': Meal,
         'FoodEntry': FoodEntry,
@@ -48,8 +49,6 @@ def add_off_data_as_food(data):
         "protein": nutrient_data['proteins_100g'],
         "fibre": nutrient_data['fiber_100g']
     }
-    
-    print(nutrition_records)
 
     food = Food(name=product_name, barcode=barcode, serving_size=size, brand=brand)
     nrs = []
@@ -80,9 +79,9 @@ def profile():
     if change_password_form.validate_on_submit():
         if current_user.check_password(change_password_form.current_password.data):
             current_user.set_password(change_password_form.new_password.data)
-            flash('Password changed successfully')
+            flash('Password changed successfully', 'success')
         else:
-            flash('Incorrect current password')
+            flash('Incorrect current password', 'danger')
 
     return render_template('profile.html', profile=current_user, form=change_password_form)
 
@@ -95,7 +94,7 @@ def login():
     if form.validate_on_submit():
         user = Profile.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
 
         login_user(user, remember=True)
@@ -134,6 +133,9 @@ def diary(indate : str):
     diary_entry = db.session.query(DiaryEntry).filter_by(day=date_select).one_or_none()
     if not diary_entry:
         diary_entry = DiaryEntry(day=date_select, profile=current_user)
+        default_meals = current_user.get_default_meals()
+        for meal in default_meals:
+            db.session.add(Meal(category=meal, diaryentry=diary_entry))
         db.session.add(diary_entry)
         db.session.commit()
 
@@ -164,7 +166,7 @@ def addmeal(meal_id, query=''):
     foods = db.session.query(Food).filter(Food.name.like(query)).limit(5).all()
 
     if not meal:
-        flash('That meal ID doesnt exist!')
+        flash('That meal ID doesnt exist!', 'danger')
         return redirect(url_for('index'))
     
     return render_template('addmeal.html', meal=meal, foods=foods)
@@ -185,6 +187,41 @@ def addfood(meal_id, food_id):
     db.session.commit()
 
     return redirect(url_for('diary', indate=diary_date))
+
+@app.route('/food/manual', defaults={'barcode':''}, methods=['GET', 'POST'])
+@app.route('/food/manual/<barcode>', methods=['GET', 'POST'])
+def manual_addfood(barcode):
+    form = ManualFoodForm()
+    form.barcode.data = barcode
+    meal_id = request.args.get('meal_id', default='')
+    
+    if form.validate_on_submit():
+        food = Food(name=form.name.data, brand=form.brand.data, barcode=form.barcode.data, serving_size=form.serving_size.data)
+
+        calories = NutritionRecord(name='calories', per_100=form.calories.data, food=food)
+        calories.update()
+
+        fat = NutritionRecord(name='fat', per_100=form.fat.data, food=food)
+        fat.update()
+
+        sugar = NutritionRecord(name='sugar', per_100=form.sugar.data, food=food)
+        sugar.update()
+
+        salt = NutritionRecord(name='salt', per_100=form.salt.data, food=food)
+        salt.update()
+
+        protein = NutritionRecord(name='protein', per_100=form.protein.data, food=food)
+        protein.update()
+
+        fibre = NutritionRecord(name='fibre', per_100=form.fibre.data, food=food)
+        fibre.update()
+
+        db.session.add_all([food, calories, fat, sugar, salt, protein, fibre])
+        db.session.commit()
+
+        return redirect(url_for('addmeal', meal_id=meal_id, query=food.name))
+
+    return render_template('addfood.html', form=form)
 
 @app.route('/scan/<meal_id>')
 @login_required
@@ -211,12 +248,12 @@ def barcode_search(meal_id, barcode):
         fooddata = search_barcode(barcode)
 
         if not fooddata:
-            flash('Could not find food on Open Food Facts')
+            flash('Could not find food on Open Food Facts', 'danger')
             return redirect(url_for('addmeal', meal_id=meal_id))
         
         food_id = add_off_data_as_food(fooddata)
         if not food_id:
-            flash('There was an error adding the food')
+            flash('There was an error adding the food', 'danger')
             return redirect(url_for('addmeal', meal_id=meal_id))
     else:
         food_id = food.id
@@ -229,7 +266,7 @@ def edit_food(food_id):
     food = db.session.query(Food).filter_by(id=food_id).one_or_none()
 
     if not food:
-        flash('Food not found')
+        flash('Food not found', 'danger')
         return redirect(url_for('index'))
     
     return render_template('editfood.html', food=food)
@@ -241,7 +278,7 @@ def remove_meal(uuid):
     meal = db.session.query(Meal).filter_by(id=uuid).one_or_none()
 
     if not meal:
-        flash('That meal ID doesnt exist')
+        flash('That meal ID doesnt exist', 'danger')
 
     for entry in meal.foodentries:
         db.session.query(FoodEntry).filter_by(id=entry.id).delete()

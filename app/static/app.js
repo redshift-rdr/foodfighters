@@ -34,6 +34,16 @@ function food_lookup()
     window.location.href = url;
 }
 
+$(document).ready(
+    function()
+    {
+        var avatar = $('#avatar')[0];
+        if (avatar)
+        {
+            avatar.src = generateAvatar(avatar.dataset.username.charAt(0).toUpperCase(), "white", "#009578");
+        }
+    }
+);
 
 $(document).on("keypress", "input", function(e){
     if ($(this).attr('id') === 'food_lookup_input') 
@@ -58,12 +68,35 @@ function edit_food(input, model, attribute)
         // if the request finishes and is successful
         if (http.readyState == 4 && http.status == 200)
         {
-            location.reload();
+            input.classList.add('inputbgsuccess');
+
+            setTimeout( function(){
+                input.classList.add('inputbgfade');
+                input.classList.remove('inputbgsuccess');
+                
+            }, 1000);
+            //location.reload();
+
+            setTimeout( function() {
+                input.classList.remove('inputbgfade');
+            }, 1500);
         }
         else if (http.readyState == 4 && http.status != 200)
         {
             // log the error
             console.log(http.responseText);
+            input.classList.add('inputbgfail');
+
+            setTimeout( function(){
+                input.classList.add('inputbgfade');
+                input.classList.remove('inputbgfail');
+                
+            }, 1000);
+            //location.reload();
+
+            setTimeout( function() {
+                input.classList.remove('inputbgfade');
+            }, 1500);
         }
     };
 
@@ -143,3 +176,25 @@ function toggle_remove_button(remove_container_id, calories_container_id)
     remove_container.toggle();
     calories_container.toggle();
 }
+
+function generateAvatar(text, foregroundColor) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = 125;
+    canvas.height = 125;
+
+    // Draw background
+    context.fillStyle = "#" + Math.floor(Math.random()*16777215).toString(16);;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw text
+    context.font = "bold 100px Assistant";
+    context.fillStyle = foregroundColor;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(text, canvas.width / 2, canvas.height / 2 + 5);
+
+    return canvas.toDataURL("image/png");
+}
+
