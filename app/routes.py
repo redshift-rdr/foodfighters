@@ -9,6 +9,7 @@ from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm, 
 from datetime import date, timedelta
 from app.utils import get_barcode_from_imagedata, search_barcode
 from flask_login import current_user, login_user, logout_user, login_required
+from sqlalchemy import asc
 
 ## utility functions
 def get_model(model_name : str):
@@ -84,6 +85,27 @@ def profile():
             flash('Incorrect current password', 'danger')
 
     return render_template('profile.html', profile=current_user, form=change_password_form)
+
+@app.route('/chart')
+def chart():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    diary_entries = db.session.query(DiaryEntry).filter(DiaryEntry.day.between(start_date, end_date)).order_by(asc(DiaryEntry.day)).all()
+
+    labels = [
+        de.day.strftime('%a %-d %b') for de in diary_entries
+    ]
+
+    values = [
+        de.nutrition().get('calories', 0) for de in diary_entries
+    ]
+
+    colors = [
+        "#F7464A", "#46BFBD"
+        ]
+    
+    return render_template('chart.html', labels=labels, values=values, colors=colors)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
