@@ -44,6 +44,7 @@ def add_off_data_as_food(data):
     nutrient_data = data['product']['nutriments']
     nutrition_records = {
         "calories": nutrient_data['energy-kcal_100g'],
+        "carbohydrates": nutrient_data['carbohydrates_100g'],
         "fat": nutrient_data['fat_100g'],
         "sugar": nutrient_data['sugars_100g'],
         "salt": nutrient_data['salt_100g'],
@@ -177,6 +178,18 @@ def remove_food(foodentry_id):
     db.session.commit()
 
     return redirect(url_for('diary', indate=diary_date))
+
+@app.route('/diary/nutrition/<indate>', methods=['GET', 'POST'])
+@login_required
+def diary_nutrition(indate : str):
+    if not indate:
+        date_select = date.today()
+    else:
+        date_select = date.fromisoformat(indate)
+
+    diary_entry = db.session.query(DiaryEntry).filter_by(day=date_select).one_or_none()
+
+    return render_template('nutrition.html', diary_entry=diary_entry)
 
 @app.route('/addmeal/<meal_id>', methods=['GET', 'POST'])
 @app.route('/addmeal/<meal_id>/<query>', methods=['GET', 'POST'])
@@ -355,6 +368,8 @@ def update(model, uuid):
     model = get_model(model)
     data = request.get_json()
 
+    print(data)
+
     model_instance = db.session.query(model).filter_by(id=uuid).first()
     if not model_instance:
         return jsonify({"error": "could not find a model with that uuid"}),400
@@ -363,7 +378,7 @@ def update(model, uuid):
         for k,v in data.items():
             if hasattr(model_instance, k):
                 # hack for date fields
-                if k in ['start', 'end', 'deadline']:
+                if k in ['day']:
                     setattr(model_instance, k, date.fromisoformat(v))
                 else:
                     setattr(model_instance, k, v)

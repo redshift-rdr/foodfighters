@@ -7,13 +7,13 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-2 p-0">
-                    <a class="btn btn-outline-light" onclick="date_button_change('minus')"><i class="bi bi-arrow-left"></i></a>
+                    <a class="btn btn-outline-light" onclick="date_button_change(url='/diary/',mode='minus')"><i class="bi bi-arrow-left"></i></a>
                 </div>
                 <div class="col p-0">
                     <input style="text-align: center;" class="form-control" type="date" id="date-select" value="{{diary_entry.day}}" onchange="date_select_change(this)">
                 </div>
                 <div class="col-2 p-0">
-                    <a class="btn btn-outline-light" onclick="date_button_change('add')"><i class="bi bi-arrow-right"></i></a>
+                    <a class="btn btn-outline-light" onclick="date_button_change(url='/diary/',mode='add')"><i class="bi bi-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -66,9 +66,20 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mb-2">
                             <div class="col">
-                                {% if entry.food.brand %}<span class="text-muted">{{ entry.food.brand }}</span>{% endif %}
+                                {% if entry.food.brand %}<span class="text-muted">{{ entry.food.brand }},</span>{% endif %}
+                                <span class="dropdown">
+                                    <a class="link-secondary" href="#" role="button" id="meal_options_link" data-bs-toggle="dropdown" aria-expanded="false">
+                                         {{ entry.quantity }} portion 
+                                    </a>
+                                  
+                                    <ul class="dropdown-menu" aria-labelledby="meal_options_link">
+                                        {% for i in range(1, 10) %}
+                                            <li><input type="submit" value="{{ i }}" class="btn dropdown-item" data-uuid="{{entry.id}}" onclick="change_foodentry_quantity('{{entry.id}}',{{i}})"></li>
+                                        {% endfor %}
+                                    </ul>
+                                </span>
                             </div>
                         </div>
                     {% endfor %}

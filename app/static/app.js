@@ -1,11 +1,11 @@
 
-function date_select_change(selector)
+function date_select_change(selector, url="/diary/", )
 {
     var day = new Date(selector.value).toISOString().split('T')[0];
-    window.location.href = "/diary/" + day;
+    window.location.href = url + day;
 }
 
-function date_button_change(mode='minus')
+function date_button_change(url="/diary/", mode='minus')
 {
     var date_selector = $('#date-select')[0];
 
@@ -20,7 +20,7 @@ function date_button_change(mode='minus')
     }
     
     var day = temp.toISOString().split('T')[0];
-    window.location.href = "/diary/" + day;
+    window.location.href = url + day;
 }
 
 function food_lookup()
@@ -54,6 +54,34 @@ $(document).on("keypress", "input", function(e){
         }
     }
 });
+
+function change_foodentry_quantity(uuid, qty)
+{
+
+    // construct the http request
+    var url = "/api/FoodEntry/" + uuid + "/update";
+    var http = new XMLHttpRequest();
+    http.onreadystatechange = function()
+    {
+        // if the request finishes and is successful
+        if (http.readyState == 4 && http.status == 200)
+        {
+            location.reload();
+        }
+        else if (http.readyState == 4 && http.status != 200)
+        {
+            // log the error
+            console.log(http.responseText);
+        }
+    };
+
+    // open the request, and set the data type to JSON
+    http.open("POST", url);
+    http.setRequestHeader("Content-Type", "application/json");
+
+    // send off the request
+    http.send(JSON.stringify({ "quantity" : qty }));
+}
 
 function edit_food(input, model, attribute)
 {
@@ -104,8 +132,10 @@ function edit_food(input, model, attribute)
     http.open("POST", url);
     http.setRequestHeader("Content-Type", "application/json");
 
+    var input_value = input.value;
+
     // send off the request
-    http.send(JSON.stringify({ [attribute] : input.value }));
+    http.send(JSON.stringify({ [attribute] : input_value }));
 }
 
 function edit_food_size(input)
