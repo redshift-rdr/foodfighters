@@ -3,6 +3,18 @@
 {% block content %}
 
 <div class="container">
+    <div class="row mt-2 text-center align-items-center">
+        <div class="col">
+            <a class="text-success" href="{{ url_for('diary', indate=indate) }}">< Back</a>
+        </div>
+        <div class="col">
+            <h2>Edit food</h2>
+        </div>
+        <div class="col">
+            
+        </div>
+        
+    </div>
     <div class="row mt-2">
         <div class="col">
             <div class="form-floating mb-1">
@@ -22,7 +34,7 @@
     <div class="row">
         <div class="col">
             <div class="form-floating mb-1">
-                <input class="form-control" data-uuid="{{ food.id }}" type="number" value="{{ food.serving_size }}" placeholder="serving size (g)" onblur="edit_food_size(this)">
+                <input class="form-control" data-uuid="{{ food.id }}" type="number" value="{{ food.serving_size }}" placeholder="serving size (g)" onchange="edit_food_size(this)" onblur="edit_food_size(this)">
                 <label class="text-muted">serving size (g)</label>
             </div>
             

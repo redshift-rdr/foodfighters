@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateField, HiddenField, FloatField, SelectField, FloatField, PasswordField
 from wtforms.validators import DataRequired, Optional, Email, EqualTo, ValidationError
 from app.models import Profile
-from password_strength import PasswordStats
 from wtforms.widgets import NumberInput
 
 class RegisterForm(FlaskForm):
@@ -21,12 +20,6 @@ class RegisterForm(FlaskForm):
         user = Profile.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
-
-    def validate_password(self, password):
-        password_stat = PasswordStats(password.data)
-
-        if password_stat.strength() < 0.66:
-            raise ValidationError('Thats a bad password. Choose a better one')
         
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])

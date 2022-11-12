@@ -2,6 +2,16 @@ import cv2, requests
 from pyzbar.pyzbar import decode, ZBarSymbol
 import numpy
 
+recommended_nutrition = {
+    "calories": 2000,
+    "fibre": 30,
+    "sugar": 30,
+    "salt": 6,
+    "carbohydrates": 300,
+    "fat": 30,
+    "protein": 50
+}
+
 def get_barcode_from_imagedata(imagedata : str):
     try:
         image_unchanged = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_UNCHANGED)

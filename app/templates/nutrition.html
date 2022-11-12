@@ -21,44 +21,77 @@
         </div>
     </div>
 
+    <canvas id="myChart" width="400" height="400"></canvas>
+
     <div class="card card-body mt-2 pt-1">
-        <div class="row text-center mb-2 text-muted">
-            <div class="col-6">
+        <div class="row mb-2 text-muted">
+            <div class="col-5">
             </div>
-            <div class="col">
+            <div class="col p-0">
                 Total
             </div>
-            <div class="col">
+            <div class="col p-0">
                 Goal
             </div>
-            <div class="col">
+            <div class="col p-0">
                 Left
             </div>
         </div>
         {% for k,v in diary_entry.nutrition().items() %}
-            <div class="row text-center">
-                <div class="col-6">
+            <div class="row">
+                <div class="col-5 text-truncate">
                     {{ k }}
                 </div>
-                <div class="col">
-                    {{ v }}
+                <div class="col p-0">
+                    <!-- Total -->
+                    {{ v|round(2) }}
                 </div>
-                <div class="col">
-                    0
+                <div class="col p-0">
+                    <!-- Goal -->
+                    {{ current_user.get_nutrition_goal(k)|round(2) }}
                 </div>
-                <div class="col">
-                    0
+                <div class="col p-0">
+                    <!-- Left -->
+                    {{ current_user.get_nutrition_goal(k) - v|round(2) }}
                 </div>
             </div>
-            <div class="row mb-2 mt-1">
+            <div class="row mb-3 mt-1">
                 <div class="col">
                     <div class="progress" style="height: 4px;">
-                        <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        {% set bg = "danger" if (v / current_user.get_nutrition_goal(k)) * 100 > 75 else "success" %}
+                        <div class="progress-bar bg-{{ bg }}" role="progressbar" style="width: {{ (v / current_user.get_nutrition_goal(k)) * 100 }}%;" aria-valuenow="{{ v }}" aria-valuemin="0" aria-valuemax="{{ current_user.get_nutrition_goal(k) }}"></div>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+<script>
+    const data = {
+        labels: [
+            'Carbohydrates',
+            'Protein',
+            'Fat'
+        ],
+        datasets: [{
+            data: [{{ diary_entry.nutrition().get('carbohydrates', 0) }}, {{ diary_entry.nutrition().get('protein', 0) }}, {{ diary_entry.nutrition().get('fat', 0) }}],
+            backgroundColor: [
+            'rgb(255, 99, 132)',
+            'rgb(54, 162, 235)',
+            'rgb(255, 205, 86)'
+            ],
+            hoverOffset: 4
+        }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: data,
+    };
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, config);
+</script>
   
 {% endblock %}

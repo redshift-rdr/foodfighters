@@ -53,9 +53,11 @@
       {% endif %}
   </div>
 
+    <div class="main-container">
     {% block content %}
     
     {% endblock %}
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

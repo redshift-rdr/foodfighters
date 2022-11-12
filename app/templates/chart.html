@@ -5,6 +5,21 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
 <div class="container mt-2">
+    <div id="date_select_card" class="card bg-success text-center">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    From
+                    <input style="text-align: center;" class="form-control" type="date" id="date-select" value="" onchange="">
+                </div>
+                <div class="col">
+                    To
+                    <input style="text-align: center;" class="form-control" type="date" id="date-select" value="" onchange="">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <canvas id="myChart" width="400" height="400"></canvas>
 <script>
 const ctx = document.getElementById('myChart').getContext('2d');
@@ -39,7 +54,7 @@ const myChart = new Chart(ctx, {
         scales: {
             y: {
                 beginAtZero: true,
-                max: 2500
+                max: {{ current_user.get_nutrition_goal('calories')}}
 
             }
         }

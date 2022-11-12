@@ -1,8 +1,8 @@
 """bang
 
-Revision ID: 7df67db86fbf
+Revision ID: 0899bc69912a
 Revises: 
-Create Date: 2022-11-07 20:40:01.663207
+Create Date: 2022-11-12 17:08:12.157316
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7df67db86fbf'
+revision = '0899bc69912a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,6 +33,7 @@ def upgrade():
     sa.Column('username', sa.String(length=32), nullable=True),
     sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('email', sa.String(length=96), nullable=False),
+    sa.Column('default_meals', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_profile_email'), 'profile', ['email'], unique=False)
@@ -50,7 +51,9 @@ def upgrade():
     sa.Column('per_100', sa.Float(), nullable=True),
     sa.Column('amount', sa.Float(), nullable=True),
     sa.Column('food_id', sa.String(length=36), nullable=True),
+    sa.Column('profile_id', sa.String(length=36), nullable=True),
     sa.ForeignKeyConstraint(['food_id'], ['food.id'], ),
+    sa.ForeignKeyConstraint(['profile_id'], ['profile.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('meal',

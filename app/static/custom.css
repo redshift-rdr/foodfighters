@@ -18,3 +18,7 @@
     transition: .5s;
     background-color: white;
 }
+
+.main-container {
+    margin-bottom: 100px;
+}

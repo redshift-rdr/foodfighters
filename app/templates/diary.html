@@ -54,7 +54,7 @@
                     {% for entry in meal.foodentries %}
                         <div class="row">
                             <div class="col-10">
-                                <a class="link-success" href="{{ url_for('edit_food',food_id=entry.food.id) }}">{{ entry.food.name }}</a>
+                                <a class="link-success" href="{{ url_for('edit_food',food_id=entry.food.id,indate=diary_entry.day.isoformat()) }}">{{ entry.food.name }}</a>
                             </div>
                             <div class="col">
                                 {% if 'calories' in meal.nutrition() %}
@@ -71,7 +71,7 @@
                                 {% if entry.food.brand %}<span class="text-muted">{{ entry.food.brand }},</span>{% endif %}
                                 <span class="dropdown">
                                     <a class="link-secondary" href="#" role="button" id="meal_options_link" data-bs-toggle="dropdown" aria-expanded="false">
-                                         {{ entry.quantity }} portion 
+                                         {{ entry.quantity }} portion(s) 
                                     </a>
                                   
                                     <ul class="dropdown-menu" aria-labelledby="meal_options_link">
@@ -133,7 +133,11 @@
         </div>
     </div>
 
-    </script>
+    <div class="row mt-2 text-center">
+        <div class="col">
+            <a class="btn btn-success rounded-pill ps-5 pe-5" href="{{ url_for('diary_nutrition', indate=diary_entry.day.isoformat()) }}">Nutrition</a>
+        </div>
+    </div>
 </div>
 
   

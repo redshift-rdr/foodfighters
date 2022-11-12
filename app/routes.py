@@ -7,7 +7,7 @@ from app import app, db
 from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
 from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm, ManualFoodForm
 from datetime import date, timedelta
-from app.utils import get_barcode_from_imagedata, search_barcode
+from app.utils import get_barcode_from_imagedata, search_barcode, recommended_nutrition
 from flask_login import current_user, login_user, logout_user, login_required
 from sqlalchemy import asc
 
@@ -39,18 +39,21 @@ def add_off_data_as_food(data):
     product_name = data['product']['product_name']
     brand = data['product']['brands']
     barcode = data['code']
-    size = data['product']['serving_quantity']
+    size = data['product'].get('serving_quantity', 1)
 
     nutrient_data = data['product']['nutriments']
     nutrition_records = {
-        "calories": nutrient_data['energy-kcal_100g'],
-        "carbohydrates": nutrient_data['carbohydrates_100g'],
-        "fat": nutrient_data['fat_100g'],
-        "sugar": nutrient_data['sugars_100g'],
-        "salt": nutrient_data['salt_100g'],
-        "protein": nutrient_data['proteins_100g'],
-        "fibre": nutrient_data['fiber_100g']
+        "calories": nutrient_data.get('energy-kcal_100g', 0),
+        "carbohydrates": nutrient_data.get('carbohydrates_100g', 0),
+        "fat": nutrient_data.get('fat_100g', 0),
+        "sugar": nutrient_data.get('sugars_100g', 0),
+        "salt": nutrient_data.get('salt_100g', 0),
+        "protein": nutrient_data.get('proteins_100g', 0),
+        "fibre": nutrient_data.get('fiber_100g', 0)
     }
+
+    if not all(nutrition_records.values()):
+        flash('Some nutrition records could not be found, please review added food')
 
     food = Food(name=product_name, barcode=barcode, serving_size=size, brand=brand)
     nrs = []
@@ -125,13 +128,17 @@ def login():
 
     return render_template('login.html', form=form, nonav=True)
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
         user = Profile(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+
+        for k,v in recommended_nutrition.items():
+            user.nutrition_goals.append(NutritionRecord(name=k, amount=v))
+
         db.session.add(user)
         db.session.commit()
         
@@ -188,6 +195,9 @@ def diary_nutrition(indate : str):
         date_select = date.fromisoformat(indate)
 
     diary_entry = db.session.query(DiaryEntry).filter_by(day=date_select).one_or_none()
+    if not diary_entry:
+        flash('There is no diary entry for that date!', 'danger')
+        return redirect(url_for('diary', indate=indate))
 
     return render_template('nutrition.html', diary_entry=diary_entry)
 
@@ -298,13 +308,14 @@ def barcode_search(meal_id, barcode):
 @app.route('/food/edit/<food_id>', methods=['GET', 'POST'])
 @login_required
 def edit_food(food_id):
+    indate = request.args.get('indate', '')
     food = db.session.query(Food).filter_by(id=food_id).one_or_none()
 
     if not food:
         flash('Food not found', 'danger')
         return redirect(url_for('index'))
     
-    return render_template('editfood.html', food=food)
+    return render_template('editfood.html', food=food, indate=indate)
 
 @app.route('/meal/<uuid>/remove', methods=['GET'])
 @login_required

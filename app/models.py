@@ -19,9 +19,10 @@ class Profile(db.Model, UserMixin):
     username = db.Column(db.String(32), index=True)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(96), index=True, nullable=False)
-    default_meals = db.Column(db.Text)
+    default_meals = db.Column(db.Text, default='')
 
     diaryentries = db.relationship('DiaryEntry', back_populates='profile')
+    nutrition_goals = db.relationship('NutritionRecord')
 
     def __repr__(self):
         return f'<Profile: {self.username}>'
@@ -42,7 +43,14 @@ class Profile(db.Model, UserMixin):
             else:
                 return [self.default_meals]
         else:
-            return None
+            return []
+        
+    def get_nutrition_goal(self, nutrition_name):
+        for nutgoal in self.nutrition_goals:
+            if nutrition_name == nutgoal.name:
+                return nutgoal.amount
+            
+        return 0
 
 class DiaryEntry(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -145,6 +153,8 @@ class NutritionRecord(db.Model):
 
     food_id = db.Column(db.String(36), db.ForeignKey('food.id'))
     food = db.relationship('Food', back_populates='nutrition_records')
+
+    profile_id = db.Column(db.String(36), db.ForeignKey('profile.id'))
 
     def __repr__(self):
         return f'<NutritionRecord: {self.name}-{self.id}>'

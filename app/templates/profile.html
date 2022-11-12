@@ -4,7 +4,7 @@
 
 <div class="container mt-2">
     <div class="card">
-        <div class="card-body text-center">
+        <div class="card-body text-center pb-0">
             <img class="rounded-circle" id="avatar" alt="Avatar" data-username="{{ profile.username }}">
             <div class="display-1 text-dark">
                 {{ profile.username }}
@@ -42,8 +42,24 @@
                     </button>
                 </div>
             </div>
-            
         </div>
+    </div>
+
+    <div class="card card-body mt-2">
+        <div class="row text-center">
+            <h5>Daily Nutrition Goals</h5>
+        </div>
+        
+        {% for nutgoal in profile.nutrition_goals %}
+            <div class="row mb-1 align-items-center">
+                <div class="col-8">
+                    {{ nutgoal.name}}
+                </div>
+                <div class="col">
+                    <input class="form-control" data-uuid="{{ nutgoal.id }}" type="number" step="0.1" value="{{ nutgoal.amount }}" onblur="edit_food(this, 'NutritionRecord', 'amount')">
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
     <div class="modal" id="changePWModal" tabindex="-1">
