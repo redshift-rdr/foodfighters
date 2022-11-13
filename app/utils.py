@@ -1,6 +1,7 @@
 import cv2, requests
 from pyzbar.pyzbar import decode, ZBarSymbol
 import numpy
+from random import randint
 
 recommended_nutrition = {
     "calories": 2000,
@@ -11,6 +12,10 @@ recommended_nutrition = {
     "fat": 30,
     "protein": 50
 }
+
+def generate_random_colour():
+    r = lambda: randint(0,255)
+    return '#%02X%02X%02X' % (r(),r(),r())
 
 def get_barcode_from_imagedata(imagedata : str):
     try:

@@ -5,16 +5,29 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
 <div class="container mt-2">
-    <div id="date_select_card" class="card bg-success text-center">
-        <div class="card-body">
+    <div id="date_select_card" class="card bg-success text-center text-light">
+        <div class="card-body p-2">
             <div class="row">
                 <div class="col">
                     From
-                    <input style="text-align: center;" class="form-control" type="date" id="date-select" value="" onchange="">
+                    <input style="text-align: center;" class="form-control" type="date" id="start_date" value="{{ start_date }}" onchange="chart_change_date()">
                 </div>
                 <div class="col">
                     To
-                    <input style="text-align: center;" class="form-control" type="date" id="date-select" value="" onchange="">
+                    <input style="text-align: center;" class="form-control" type="date" id="end_date" value="{{ end_date }}" onchange="chart_change_date()">
+                </div>
+            </div>
+            <div class="row mt-1">
+                <div class="col">
+                    <select id="nutrient_select" class="form-select" onchange="chart_change_date()">
+                        <option value="calories" {% if nutrient_name == "calories" %}selected{% endif %}>Calories</option>
+                        <option value="fat"{% if nutrient_name == "fat" %}selected{% endif %}>Fat</option>
+                        <option value="carbohydrates"{% if nutrient_name == "carbohydrates" %}selected{% endif %}>Carbohydrates</option>
+                        <option value="salt" {% if nutrient_name == "salt" %}selected{% endif %}>Salt</option>
+                        <option value="sugar" {% if nutrient_name == "sugar" %}selected{% endif %}>Sugar</option>
+                        <option value="protein" {% if nutrient_name == "protein" %}selected{% endif %}>Protein</option>
+                        <option value="fibre" {% if nutrient_name == "fibre" %}selected{% endif %}>Fibre</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -32,7 +45,7 @@ const myChart = new Chart(ctx, {
             {% endfor %}
         ],
         datasets: [{
-            label: 'Calories kcal',
+            label: '{{ nutrient_name }}',
             data: [
                 {% for value in values %}
                     "{{ value }}",
@@ -40,21 +53,16 @@ const myChart = new Chart(ctx, {
             ],
             backgroundColor: [
                 {% for colour in colors %}
-                    "{{ color }}",
+                    "{{ colour }}",
                 {% endfor %}
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)'
-            ],
-            borderWidth: 1
+            ]
         }]
     },
     options: {
         scales: {
             y: {
                 beginAtZero: true,
-                max: {{ current_user.get_nutrition_goal('calories')}}
+                max: {{ current_user.get_nutrition_goal(nutrient_name)}}
 
             }
         }

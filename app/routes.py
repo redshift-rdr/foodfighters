@@ -7,12 +7,22 @@ from app import app, db
 from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
 from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm, ManualFoodForm
 from datetime import date, timedelta
-from app.utils import get_barcode_from_imagedata, search_barcode, recommended_nutrition
+from app.utils import get_barcode_from_imagedata, search_barcode, recommended_nutrition, generate_random_colour
 from flask_login import current_user, login_user, logout_user, login_required
 from sqlalchemy import asc
 
-## utility functions
-def get_model(model_name : str):
+#######################
+## utility functions ##
+#######################
+def get_model(model_name : str) -> db.Model:
+    """ Map model names to Models
+
+        Args:
+            model_name: The name of the model to be returned
+
+        Returns:
+            A SQLAlchemy model, or None
+    """
     model_map = {
         'Profile': Profile,
         'DiaryEntry': DiaryEntry,
@@ -22,26 +32,43 @@ def get_model(model_name : str):
         'NutritionRecord': NutritionRecord
     }
 
-    try:
-        return model_map[model_name]
-    except KeyError:
-        return None
+    return model_map.get(model_name, None)
     
-def lookup_barcode(barcode):
+def lookup_barcode(barcode : str) -> db.Model:
+    """ Gets a Food object using a barcode lookup
+
+        Args:
+            barcode: The barcode string used to lookup the Food object. 
+
+        Returns:
+            A models.Food object, or None
+    """
     return db.session.query(Food).filter_by(barcode=barcode).one_or_none()
 
+def add_off_data_as_food(data : dict) -> str:
+    """  Creates a new Food object, using data provided by Open Food Facts (OFF) (https://world.openfoodfacts.org/)
 
-def add_off_data_as_food(data):
-    """
-        TODO: redo this - 
-    """
-    #try:
-    product_name = data['product']['product_name']
-    brand = data['product']['brands']
-    barcode = data['code']
-    size = data['product'].get('serving_quantity', 1)
+        Args:
+            data: A dict taken from a OFF API call
 
-    nutrient_data = data['product']['nutriments']
+        Returns:
+            A str representing a UUID, identifying the Food object created
+    """
+
+    # grab product details
+    try:
+        product_name = data['product']['product_name']
+        brand = data['product']['brands']
+        barcode = data['code']
+        size = data['product'].get('serving_quantity', 1)
+
+        # grab nutrient data 
+        nutrient_data = data['product']['nutriments']
+    except KeyError:
+        # if a KeyError is encountered that means OFF did not have the product
+        # in its database
+        return None
+    
     nutrition_records = {
         "calories": nutrient_data.get('energy-kcal_100g', 0),
         "carbohydrates": nutrient_data.get('carbohydrates_100g', 0),
@@ -52,35 +79,42 @@ def add_off_data_as_food(data):
         "fibre": nutrient_data.get('fiber_100g', 0)
     }
 
+    # warn the user if not call nurtrient data is avaiable from OFF
     if not all(nutrition_records.values()):
         flash('Some nutrition records could not be found, please review added food')
 
+    # create a Food object from retrieved data, including NutrientRecords
     food = Food(name=product_name, barcode=barcode, serving_size=size, brand=brand)
     nrs = []
     for k, v in nutrition_records.items():
         nrs.append(NutritionRecord(name=k, per_100=round(v, 2), amount=round(v/100*int(food.serving_size), 2), food=food))
 
+    # add the Food object to the database
     db.session.add(food)
     db.session.add_all(nrs)
     db.session.commit()
-    # except Exception as e:
-    #     print(f'Error: {e}')
-    #     return None
 
     return food.id
 
+##############
+### routes ###
+##############
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
+    """ the / route, redirect to /diary
+    """
     return redirect(url_for('diary'))
-    #return render_template('index.html')
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    """ The profile page, used to review and change profile information
+    """
     change_password_form = ChangePasswordForm()
 
+    # change the password
     if change_password_form.validate_on_submit():
         if current_user.check_password(change_password_form.current_password.data):
             current_user.set_password(change_password_form.new_password.data)
@@ -91,25 +125,41 @@ def profile():
     return render_template('profile.html', profile=current_user, form=change_password_form)
 
 @app.route('/chart')
+@login_required
 def chart():
+    """ Display a bar chart of selected nutrient over time
+
+        Args (GET):
+            start_date:     The date from which the data should be shown
+            end_date:       The end date for the data to be shown
+            nutrient_name:  The name of the nutrient values to be shown
+    """
+    # grab the GET arguments
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
+    nutrient_name = request.args.get('nutrient_name', 'calories')
 
+    # make sure the nutrient name is within allowed values
+    if nutrient_name not in recommended_nutrition.keys():
+        nutrient_name = 'calories'
+
+    # grab the diary entries between the selected dates
     diary_entries = db.session.query(DiaryEntry).filter(DiaryEntry.day.between(start_date, end_date)).order_by(asc(DiaryEntry.day)).all()
 
+    # create the bar chart data, to be used by chart.js
     labels = [
         de.day.strftime('%a %-d %b') for de in diary_entries
     ]
 
     values = [
-        de.nutrition().get('calories', 0) for de in diary_entries
+        de.nutrition().get(nutrient_name, 0) for de in diary_entries
     ]
 
     colors = [
-        "#F7464A", "#46BFBD"
-        ]
+        generate_random_colour() for _ in diary_entries
+    ]
     
-    return render_template('chart.html', labels=labels, values=values, colors=colors)
+    return render_template('chart.html', labels=labels, values=values, colors=colors, start_date=start_date, end_date=end_date, nutrient_name=nutrient_name)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -152,23 +202,31 @@ def register():
 @login_required
 def diary(indate : str):
     """
-        args:
-            date - str, optional - needs to be a string date in ISO format e.g. '2022-10-29'
+        Args:
+            indate: needs to be a string date in ISO format e.g. '2022-10-29'
+                    if not indate value is provided it will default to today
     """
     if not indate:
         date_select = date.today()
     else:
-        date_select = date.fromisoformat(indate)
+        try:
+            date_select = date.fromisoformat(indate)
+        except ValueError:
+            date_select = date.today()
 
+    # grab the diary entry for selected date, if it doesn't exist create it
     diary_entry = db.session.query(DiaryEntry).filter_by(day=date_select).one_or_none()
     if not diary_entry:
         diary_entry = DiaryEntry(day=date_select, profile=current_user)
+
+        # add the default meals from the users profile
         default_meals = current_user.get_default_meals()
         for meal in default_meals:
             db.session.add(Meal(category=meal, diaryentry=diary_entry))
         db.session.add(diary_entry)
         db.session.commit()
 
+    # handle the Meal form being submitted
     form = addMealForm()
     if form.validate_on_submit():
         add_meal = Meal(category=form.category.data, diaryentry=diary_entry)
@@ -298,8 +356,8 @@ def barcode_search(meal_id, barcode):
         
         food_id = add_off_data_as_food(fooddata)
         if not food_id:
-            flash('There was an error adding the food', 'danger')
-            return redirect(url_for('addmeal', meal_id=meal_id))
+            flash('Unable to find that barcode, please add manually', 'danger')
+            return redirect(url_for('manual_addfood', barcode=barcode, meal_id=meal_id))
     else:
         food_id = food.id
 

@@ -228,3 +228,11 @@ function generateAvatar(text, foregroundColor) {
     return canvas.toDataURL("image/png");
 }
 
+function chart_change_date()
+{
+    var start_date = $('#start_date')[0].value;
+    var end_date = $('#end_date')[0].value;
+    var nutrient_select = $('#nutrient_select')[0].value;
+    var url = `/chart?start_date=${start_date}&end_date=${end_date}&nutrient_name=${nutrient_select}`;
+    window.location.href = url;
+}

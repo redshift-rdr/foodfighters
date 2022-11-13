@@ -41,31 +41,33 @@
         </div>
     </div>
 
-    <div class="row mt-2 mb-1 text-center text-decoration-underline ps-1">
-        <div class="col">
-            nutrition
-        </div>
-        <div class="col-4">
-            per 100g
-        </div>
-        <div class="col">
-            per serving
-        </div>
-    </div>
-
-    {% for record in food.nutrition_records %}
-        <div class="row mb-1 align-items-center text-center ps-1">
+    <div class="card card-body p-1">
+        <div class="row mt-2 mb-1 text-center text-decoration-underline ps-1">
             <div class="col">
-                {{ record.name }}
+                nutrition
             </div>
             <div class="col-4">
-                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.per_100 | round(3)}}" step=".01" onblur="edit_nutrition_per100(this)">
+                per 100g
             </div>
             <div class="col">
-                <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.amount | round(2) }}" step=".01" disabled>
+                per serving
             </div>
         </div>
-    {% endfor %}
+
+        {% for record in food.nutrition_records %}
+            <div class="row mb-1 align-items-center text-center ps-1">
+                <div class="col">
+                    {{ record.name }}
+                </div>
+                <div class="col-4">
+                    <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.per_100 | round(3)}}" step=".01" onblur="edit_nutrition_per100(this)">
+                </div>
+                <div class="col">
+                    <input class="form-control" data-uuid="{{ record.id }}" type="number" value="{{ record.amount | round(2) }}" step=".01" disabled>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
   
