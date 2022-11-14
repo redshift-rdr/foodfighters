@@ -1,7 +1,10 @@
-import cv2, requests
+#import cv2, 
+import requests
 from pyzbar.pyzbar import decode, ZBarSymbol
-import numpy
-from random import randint
+#import numpy
+from random import randint 
+from PIL import Image
+import io
 
 recommended_nutrition = {
     "calories": 2000,
@@ -19,9 +22,14 @@ def generate_random_colour():
 
 def get_barcode_from_imagedata(imagedata : str):
     try:
-        image_unchanged = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_UNCHANGED)
+        stream = io.BytesIO(imagedata)
+        image_unchanged = Image.open(stream)
+        # change this to use PIL
         image_greyscale = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_GRAYSCALE)
         ret, image_threshold = cv2.threshold(image_greyscale, 0, 255, cv2.THRESH_OTSU)
+        # image_unchanged = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_UNCHANGED)
+        # image_greyscale = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_GRAYSCALE)
+        # ret, image_threshold = cv2.threshold(image_greyscale, 0, 255, cv2.THRESH_OTSU)
 
         bar_u = decode(image_unchanged)
         bar_g = decode(image_greyscale)
