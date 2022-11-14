@@ -24,9 +24,11 @@ def get_barcode_from_imagedata(imagedata : str):
     try:
         stream = io.BytesIO(imagedata)
         image_unchanged = Image.open(stream)
+        image_greyscale = image_unchanged.convert('L')
+        image_threshold = image_greyscale.point(lambda x: 255 if x > 100 else 0)
         # change this to use PIL
-        image_greyscale = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_GRAYSCALE)
-        ret, image_threshold = cv2.threshold(image_greyscale, 0, 255, cv2.THRESH_OTSU)
+        #image_greyscale = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_GRAYSCALE)
+        #ret, image_threshold = cv2.threshold(image_greyscale, 0, 255, cv2.THRESH_OTSU)
         # image_unchanged = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_UNCHANGED)
         # image_greyscale = cv2.imdecode(numpy.fromstring(imagedata, numpy.uint8), cv2.IMREAD_GRAYSCALE)
         # ret, image_threshold = cv2.threshold(image_greyscale, 0, 255, cv2.THRESH_OTSU)
