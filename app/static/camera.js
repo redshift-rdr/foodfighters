@@ -10,8 +10,8 @@ var constraints = {
   audio: false,
   video: {
    facingMode: facingMode,
-    width: { ideal: 4096 },
-    height: { ideal: 2160 }
+    width: { ideal: 4096/2 },
+    height: { ideal: 2160/2 }
   }
 };
 
@@ -20,6 +20,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(function success(stream) {
   video.srcObject = stream;
 });
 
+// camera captures image every 1 second
 setInterval(send_image, 1000);
 
 function send_image() 
@@ -29,7 +30,6 @@ function send_image()
 	canvas.height = video.videoHeight;
 	canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 	
-	//document.querySelector("#shot").appendChild(canvas);
    	canvas.toBlob((blob) => {
 		var url = '/scan_barcode';
 		var http = new XMLHttpRequest();
@@ -44,13 +44,7 @@ function send_image()
 
 		http.open("POST", url);
 		http.send(blob);
-		// const resp = fetch('/scan_barcode',
-		// {
-		// 	method: 'POST',
-		// 	body: blob
-		// }).then(response => response.text())
-	    // .then((response) => {
-		// 	window.location.href = '/barcode/search/' + response;
-		// })
-	});	
+	},
+	"image/jpeg",
+	0.4);	
 }
