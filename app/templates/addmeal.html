@@ -4,12 +4,25 @@
 
 <div class="container mt-2">
     <div class="row">
-        <div class="d-grid gap-2">
-            <a class="btn btn-lg btn-success" href="{{ url_for('scan', meal_id=meal.id) }}">
-                <h6 class="display-1">
-                    <i class="bi bi-upc-scan"></i>
-                </h6>
-            </a>
+        <div class="col pe-1">
+            <div class="d-grid gap-2">
+                <a class="btn btn-lg btn-success" href="{{ url_for('scan', meal_id=meal.id) }}">
+                    <h6 class="display-1">
+                        <i class="bi bi-upc-scan"></i>
+                    </h6>
+                    Scan
+                </a>
+            </div>
+        </div>
+        <div class="col ps-1">
+            <div class="d-grid gap-2">
+                <a class="btn btn-lg btn-success" href="{{ url_for('manual_addfood', meal_id=meal.id) }}">
+                    <h6 class="display-1">
+                        <i class="bi bi-input-cursor-text"></i>
+                    </h6>
+                    Manual
+                </a>
+            </div>
         </div>
     </div>
     <div class="row">
