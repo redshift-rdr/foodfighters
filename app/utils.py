@@ -67,7 +67,7 @@ def add_nutrition_data(nutrition_iterable):
     return nutrition_info
 
 def search_barcode(barcode):
-    url = f'https://off:off@world.openfoodfacts.net/api/v2/product/{barcode}'
+    url = f'https://off:off@uk.openfoodfacts.net/api/v2/product/{barcode}'
 
     try:
         r = requests.get(url)
@@ -75,4 +75,18 @@ def search_barcode(barcode):
     except Exception as e:
         return f'there was an error: {e}'
 
+    return data
+
+def search_off_by_product_name(product_name):
+    """ Searches the Open Food Facts API for products which match the product_name
+    """
+
+    # we dont want to send requests when product_name is blank
+    if not product_name:
+        return []
+
+    off_api_url = 'https://uk.openfoodfacts.org/cgi/search.pl'
+    search_url = f'{off_api_url}?search_terms={product_name}&json=1&fields=code,product_name,product_quantity,quantity,brands,nutriments&page_size=5'
+
+    data = requests.get(search_url).json().get('products', [])
     return data

@@ -7,7 +7,7 @@ from app import app, db
 from app.models import Profile, DiaryEntry, Meal, FoodEntry, Food, NutritionRecord
 from app.forms import LoginForm, RegisterForm, addMealForm, ChangePasswordForm, ManualFoodForm
 from datetime import date, timedelta
-from app.utils import get_barcode_from_imagedata, search_barcode, recommended_nutrition, generate_random_colour
+from app.utils import get_barcode_from_imagedata, search_barcode, recommended_nutrition, generate_random_colour,search_off_by_product_name
 from flask_login import current_user, login_user, logout_user, login_required
 from sqlalchemy import asc
 
@@ -265,14 +265,14 @@ def diary_nutrition(indate : str):
 def addmeal(meal_id, query=''):
     meal = db.session.query(Meal).filter_by(id=meal_id).one_or_none()
 
-    query = f'%{query}%'
-    foods = db.session.query(Food).filter(Food.name.like(query)).limit(5).all()
+    db_foods = db.session.query(Food).filter(Food.name.like(f'%{query}%')).limit(5).all()
+    off_foods = search_off_by_product_name(query)
 
     if not meal:
         flash('That meal ID doesnt exist!', 'danger')
         return redirect(url_for('index'))
     
-    return render_template('addmeal.html', meal=meal, foods=foods)
+    return render_template('addmeal.html', meal=meal, db_foods=db_foods, off_foods=off_foods)
 
 @app.route('/addfood/<meal_id>/<food_id>', methods=['GET','POST'])
 @login_required
